@@ -34,13 +34,19 @@ if(NOT civetweb_POPULATED)
     endif()
 endif()
 
-add_subdirectory(src/interface)
+add_subdirectory(src/ware)
+add_subdirectory(src/cli)
+add_subdirectory(src/web)
+add_subdirectory(src/file_manager)
 
 add_executable(server
     src/main.c
 )
 
 target_link_libraries(server PRIVATE 
-    interface
+    ware
+    cli
+    web
+    file_manager
     civetweb
 )
