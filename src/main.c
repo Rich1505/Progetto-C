@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "civetweb.h"
+#include"interface.h"
 
 static int handler(struct mg_connection *conn, void *cbdata)
 {

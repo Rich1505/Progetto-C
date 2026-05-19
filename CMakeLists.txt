@@ -34,8 +34,13 @@ if(NOT civetweb_POPULATED)
     endif()
 endif()
 
+add_subdirectory(src/interface)
+
 add_executable(server
     src/main.c
 )
 
-target_link_libraries(server PRIVATE civetweb)
+target_link_libraries(server PRIVATE 
+    interface
+    civetweb
+)
