@@ -25,8 +25,8 @@ typedef enum {
     STATUS_CLOSED
 } RequestStatus;
 
-Date *create_date(int, int, int);
+Date create_date(int, int, int);
 
-AssistanceRequest *create_assistance_request(int, char*, DeviceType, char*, PriorityLevel, RequestStatus, float, float, Date*);
+AssistanceRequest create_assistance_request(int, char*, DeviceType, char*, PriorityLevel, RequestStatus, float, float, Date);
 
 #endif //WARE_H
