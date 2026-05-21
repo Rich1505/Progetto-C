@@ -82,12 +82,12 @@ AssistanceRequest create_assistance_request(int request_code, char *customer_nam
 
     if (strlen(customer_name) >= MAX_CUSTOMER_NAME)
     {
-        fprintf(stderr, "Il nome inserito per il cliente è troppo lungo\n");
+        fprintf(stderr, "Il nome inserito per il cliente è troppo lungo, verrà tagliato\n");
     }
 
     if (strlen(description) >= MAX_DESCRIPTION)
     {
-        fprintf(stderr, "La descrizione inserita per la richiesta è troppo lunga\n");
+        fprintf(stderr, "La descrizione inserita per la richiesta è troppo lunga, verrà tagliata\n");
     }
 
     if (estimated_cost < 0.0f)
@@ -168,8 +168,6 @@ Date get_opening_date(AssistanceRequest request)
 
 // SETTERS
 
-// SETTERS
-
 int set_request_code(AssistanceRequest *request, int request_code)
 {
     if(request_code < 0)
@@ -186,7 +184,7 @@ int set_customer_name(AssistanceRequest *request, char *customer_name)
 {
     if(strlen(customer_name) >= MAX_CUSTOMER_NAME)
     {
-        fprintf(stderr, "Il nome inserito per il cliente è troppo lungo\n");
+        fprintf(stderr, "Il nome inserito per il cliente è troppo lungo, verrà tagliato\n");
         return -1;
     }
 
@@ -206,7 +204,7 @@ int set_description(AssistanceRequest *request, char *description)
 {
     if(strlen(description) >= MAX_DESCRIPTION)
     {
-        fprintf(stderr, "La descrizione inserita per la richiesta è troppo lunga\n");
+        fprintf(stderr, "La descrizione inserita per la richiesta è troppo lunga, verrà tagliata\n");
         return -1;
     }
 
