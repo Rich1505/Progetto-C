@@ -3,19 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_CUSTOMER_NAME 50
-#define MAX_DESCRIPTION 200
-
-#define INVALID_REQUEST_CODE -1
-
 int max_days_per_month[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-
-struct date
-{
-    int day;
-    int month;
-    int year;
-};
 
 struct assistance_request
 {
@@ -37,47 +25,43 @@ int is_leap_year(int year)
 
 Date create_date(int day, int month, int year)
 {
-    Date date;
-
     if (year < 1900)
     {
         fprintf(stderr, "Inserire un anno valido\n");
-        return (Date){INVALID_REQUEST_CODE};
+        return (Date){-1, -1, -1};
     }
 
     if (month < 1 || month > 12)
     {
         fprintf(stderr, "Inserire un mese valido\n");
-        return (Date){INVALID_REQUEST_CODE};
+        return (Date){-1, -1, -1};
     }
 
     if (day > max_days_per_month[month - 1] || day < 1)
     {
         fprintf(stderr, "Inserire un giorno valido\n");
-        return (Date){INVALID_REQUEST_CODE};
+        return (Date){-1, -1, -1};
     }
 
     if (month == 2)
     {
         if (!is_leap_year(year) && day == 29)
         {
-            fprintf(stderr, "Inserire un giorno valdio\n");
-            return (Date){INVALID_REQUEST_CODE};
+            fprintf(stderr, "Inserire un giorno valido\n");
+            return (Date){-1, -1, -1};
         }
     }
 
     return (Date){day, month, year};
 }
 
-AssistanceRequest create_assistance_request(int request_code, char *customer_name, DeviceType device_type, char *description,
-                                            PriorityLevel priority_level, RequestStatus request_status, float estimated_cost, float final_cost, Date opening_date)
+AssistanceRequest *create_assistance_request(int request_code, char *customer_name, DeviceType device_type, char *description,
+                                             PriorityLevel priority_level, RequestStatus request_status, float estimated_cost, float final_cost, Date opening_date)
 {
-    AssistanceRequest assistance_request;
-
     if (request_code < 0)
     {
         fprintf(stderr, "Inserire un codice valido\n");
-        return (AssistanceRequest){INVALID_REQUEST_CODE};
+        return NULL;
     }
 
     if (strlen(customer_name) >= MAX_CUSTOMER_NAME)
@@ -93,84 +77,88 @@ AssistanceRequest create_assistance_request(int request_code, char *customer_nam
     if (estimated_cost < 0.0f)
     {
         fprintf(stderr, "Inserire un costo stimato valido\n");
-        return (AssistanceRequest){INVALID_REQUEST_CODE};
+        return NULL;
     }
 
     if (final_cost < 0.0f)
     {
         fprintf(stderr, "Inserire un costo finale valido\n");
-        return (AssistanceRequest){INVALID_REQUEST_CODE};
+        return NULL;
     }
 
-    assistance_request.request_code = request_code;
-    strncpy(assistance_request.customer_name, customer_name, MAX_CUSTOMER_NAME - 1);
-    assistance_request.device_type = device_type;
-    strncpy(assistance_request.description, description, MAX_DESCRIPTION - 1);
-    assistance_request.priority_level = priority_level;
-    assistance_request.request_status = request_status;
-    assistance_request.estimated_cost = estimated_cost;
-    assistance_request.final_cost = final_cost;
-    assistance_request.opening_date = opening_date;
+    AssistanceRequest *assistance_request = malloc(sizeof(AssistanceRequest));
+    if (assistance_request == NULL)
+    {
+        fprintf(stderr, "Errore allocazione memoria\n");
+        return NULL;
+    }
 
-    assistance_request.customer_name[MAX_CUSTOMER_NAME - 1] = '\0';
-    assistance_request.description[MAX_DESCRIPTION - 1] = '\0';
+    assistance_request->request_code = request_code;
+    strncpy(assistance_request->customer_name, customer_name, MAX_CUSTOMER_NAME - 1);
+    assistance_request->customer_name[MAX_CUSTOMER_NAME - 1] = '\0';
+
+    assistance_request->device_type = device_type;
+
+    strncpy(assistance_request->description, description, MAX_DESCRIPTION - 1);
+    assistance_request->description[MAX_DESCRIPTION - 1] = '\0';
+
+    assistance_request->priority_level = priority_level;
+    assistance_request->request_status = request_status;
+    assistance_request->estimated_cost = estimated_cost;
+    assistance_request->final_cost = final_cost;
+    assistance_request->opening_date = opening_date;
 
     return assistance_request;
 }
 
-// GETTERS
-
-int get_request_code(AssistanceRequest request)
+int get_request_code(AssistanceRequest *request)
 {
-    return request.request_code;
+    return request->request_code;
 }
 
-char *get_customer_name(AssistanceRequest request)
+char *get_customer_name(AssistanceRequest *request)
 {
-    return request.customer_name;
+    return request->customer_name;
 }
 
-DeviceType get_device_type(AssistanceRequest request)
+DeviceType get_device_type(AssistanceRequest *request)
 {
-    return request.device_type;
+    return request->device_type;
 }
 
-char *get_description(AssistanceRequest request)
+char *get_description(AssistanceRequest *request)
 {
-    return request.description;
+    return request->description;
 }
 
-PriorityLevel get_priority_level(AssistanceRequest request)
+PriorityLevel get_priority_level(AssistanceRequest *request)
 {
-    return request.priority_level;
+    return request->priority_level;
 }
 
-RequestStatus get_request_status(AssistanceRequest request)
+RequestStatus get_request_status(AssistanceRequest *request)
 {
-    return request.request_status;
+    return request->request_status;
 }
 
-float get_estimated_cost(AssistanceRequest request)
+float get_estimated_cost(AssistanceRequest *request)
 {
-    return request.estimated_cost;
+    return request->estimated_cost;
 }
 
-float get_final_cost(AssistanceRequest request)
+float get_final_cost(AssistanceRequest *request)
 {
-    return request.final_cost;
+    return request->final_cost;
 }
 
-Date get_opening_date(AssistanceRequest request)
+Date get_opening_date(AssistanceRequest *request)
 {
-    return request.opening_date;
+    return request->opening_date;
 }
-
-
-// SETTERS
 
 int set_request_code(AssistanceRequest *request, int request_code)
 {
-    if(request_code < 0)
+    if (request_code < 0)
     {
         fprintf(stderr, "Inserire un codice valido\n");
         return -1;
@@ -182,10 +170,9 @@ int set_request_code(AssistanceRequest *request, int request_code)
 
 int set_customer_name(AssistanceRequest *request, char *customer_name)
 {
-    if(strlen(customer_name) >= MAX_CUSTOMER_NAME)
+    if (strlen(customer_name) >= MAX_CUSTOMER_NAME)
     {
-        fprintf(stderr, "Il nome inserito per il cliente è troppo lungo, verrà tagliato\n");
-        return -1;
+        fprintf(stderr, "Nome troppo lungo, verrà tagliato\n");
     }
 
     strncpy(request->customer_name, customer_name, MAX_CUSTOMER_NAME - 1);
@@ -202,10 +189,9 @@ int set_device_type(AssistanceRequest *request, DeviceType device_type)
 
 int set_description(AssistanceRequest *request, char *description)
 {
-    if(strlen(description) >= MAX_DESCRIPTION)
+    if (strlen(description) >= MAX_DESCRIPTION)
     {
-        fprintf(stderr, "La descrizione inserita per la richiesta è troppo lunga, verrà tagliata\n");
-        return -1;
+        fprintf(stderr, "Descrizione troppo lunga, verrà tagliata\n");
     }
 
     strncpy(request->description, description, MAX_DESCRIPTION - 1);
@@ -228,9 +214,9 @@ int set_request_status(AssistanceRequest *request, RequestStatus request_status)
 
 int set_estimated_cost(AssistanceRequest *request, float estimated_cost)
 {
-    if(estimated_cost < 0.0f)
+    if (estimated_cost < 0.0f)
     {
-        fprintf(stderr, "Inserire un costo stimato valido\n");
+        fprintf(stderr, "Costo stimato non valido\n");
         return -1;
     }
 
@@ -240,9 +226,9 @@ int set_estimated_cost(AssistanceRequest *request, float estimated_cost)
 
 int set_final_cost(AssistanceRequest *request, float final_cost)
 {
-    if(final_cost < 0.0f)
+    if (final_cost < 0.0f)
     {
-        fprintf(stderr, "Inserire un costo finale valido\n");
+        fprintf(stderr, "Costo finale non valido\n");
         return -1;
     }
 
