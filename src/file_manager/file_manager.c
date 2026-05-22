@@ -1,16 +1,22 @@
 #include "file_manager.h"
 #include <stdio.h>
 #include <string.h>
-#include<stdlib.h>
+#include <stdlib.h>
 #define LINE_LENGTH 1024
 
 void free_array(AssistanceRequest **arr, int size)
 {
-    for(size_t i = 0;i < size;i++)
+    for (int i = 0; i < size; i++)
     {
         free(arr[i]);
     }
     free(arr);
+}
+
+void manage_error(AssistanceRequest **arr, int size, FILE *fp)
+{
+    free_array(arr, size);
+    fclose(fp);
 }
 
 AssistanceRequest **read_from_memory(int *out_size)
@@ -42,7 +48,7 @@ AssistanceRequest **read_from_memory(int *out_size)
             if (tmp == NULL)
             {
                 fprintf(stderr, "Errore allocazione memoria\n");
-                free_array(array, size);
+                manage_error(array, size, fp);
                 return NULL;
             }
 
@@ -54,14 +60,29 @@ AssistanceRequest **read_from_memory(int *out_size)
         char *token;
 
         token = strtok(line, ";");
+        if (token == NULL)
+        {
+            manage_error(array, size, fp);
+            return NULL;
+        }
         int request_code = atoi(token);
 
         token = strtok(NULL, ";");
+        if (token == NULL)
+        {
+            manage_error(array, size, fp);
+            return NULL;
+        }
         char customer_name[MAX_CUSTOMER_NAME];
         strncpy(customer_name, token, MAX_CUSTOMER_NAME - 1);
         customer_name[MAX_CUSTOMER_NAME - 1] = '\0';
 
         token = strtok(NULL, ";");
+        if (token == NULL)
+        {
+            manage_error(array, size, fp);
+            return NULL;
+        }
         DeviceType device_type;
 
         if (strcmp(token, "SMARTPHONE") == 0)
@@ -77,16 +98,26 @@ AssistanceRequest **read_from_memory(int *out_size)
         else
         {
             fprintf(stderr, "Inserire un tipo di dispostivo valido\n");
-            free_array(array, size);
+            manage_error(array, size, fp);
             return NULL;
         }
 
         token = strtok(NULL, ";");
+        if (token == NULL)
+        {
+            manage_error(array, size, fp);
+            return NULL;
+        }
         char description[MAX_DESCRIPTION];
         strncpy(description, token, MAX_DESCRIPTION - 1);
         description[MAX_DESCRIPTION - 1] = '\0';
 
         token = strtok(NULL, ";");
+        if (token == NULL)
+        {
+            manage_error(array, size, fp);
+            return NULL;
+        }
         PriorityLevel priority_level;
 
         int pr = atoi(token);
@@ -100,12 +131,16 @@ AssistanceRequest **read_from_memory(int *out_size)
         else
         {
             fprintf(stderr, "Inserire una priorità valida\n");
-            free_array(array, size);
+            manage_error(array, size, fp);
             return NULL;
         }
 
-
         token = strtok(NULL, ";");
+        if (token == NULL)
+        {
+            manage_error(array, size, fp);
+            return NULL;
+        }
         RequestStatus request_status;
 
         int st = atoi(token);
@@ -119,29 +154,54 @@ AssistanceRequest **read_from_memory(int *out_size)
         else
         {
             fprintf(stderr, "Inserire uno stato valido\n");
-            free_array(array, size);
+            manage_error(array, size, fp);
             return NULL;
         }
 
         token = strtok(NULL, ";");
+        if (token == NULL)
+        {
+            manage_error(array, size, fp);
+            return NULL;
+        }
         float estimated_cost = atof(token);
 
         token = strtok(NULL, ";");
+        if (token == NULL)
+        {
+            manage_error(array, size, fp);
+            return NULL;
+        }
         float final_cost = atof(token);
 
         token = strtok(NULL, ";");
+        if (token == NULL)
+        {
+            manage_error(array, size, fp);
+            return NULL;
+        }
         int day = atoi(token);
 
         token = strtok(NULL, ";");
+        if (token == NULL)
+        {
+            manage_error(array, size, fp);
+            return NULL;
+        }
         int month = atoi(token);
 
         token = strtok(NULL, ";");
+        if (token == NULL)
+        {
+            manage_error(array, size, fp);
+            return NULL;
+        }
         int year = atoi(token);
 
         Date opening_date = create_date(day, month, year);
-        if(opening_date.day == -1)
+        if (opening_date.day == -1)
         {
-            free_array(array, size);
+            manage_error(array, size, fp);
             return NULL;
         }
 
@@ -154,12 +214,12 @@ AssistanceRequest **read_from_memory(int *out_size)
             request_status,
             estimated_cost,
             final_cost,
-            opening_date
-        );
+            opening_date);
 
-        if(assistance_request == NULL)
+        if (assistance_request == NULL)
         {
             fprintf(stderr, "Errore allocazione memoria\n");
+            manage_error(array, size, fp);
             return NULL;
         }
 

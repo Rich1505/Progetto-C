@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include<stdbool.h>
 
-int max_days_per_month[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+static const int max_days_per_month[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 struct assistance_request
 {
@@ -23,24 +24,24 @@ int is_leap_year(int year)
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
 }
 
-Date create_date(int day, int month, int year)
+bool check_date(int day, int month, int year)
 {
     if (year < 1900)
     {
         fprintf(stderr, "Inserire un anno valido\n");
-        return (Date){-1, -1, -1};
+        return false;
     }
 
     if (month < 1 || month > 12)
     {
         fprintf(stderr, "Inserire un mese valido\n");
-        return (Date){-1, -1, -1};
+        return false;
     }
 
     if (day > max_days_per_month[month - 1] || day < 1)
     {
         fprintf(stderr, "Inserire un giorno valido\n");
-        return (Date){-1, -1, -1};
+        return false;
     }
 
     if (month == 2)
@@ -48,8 +49,18 @@ Date create_date(int day, int month, int year)
         if (!is_leap_year(year) && day == 29)
         {
             fprintf(stderr, "Inserire un giorno valido\n");
-            return (Date){-1, -1, -1};
+            return false;
         }
+    }
+
+    return true;
+}
+
+Date create_date(int day, int month, int year)
+{
+    if(!check_date(day,month,year))
+    {
+        return (Date){-1, -1, -1};
     }
 
     return (Date){day, month, year};
@@ -61,6 +72,18 @@ AssistanceRequest *create_assistance_request(int request_code, char *customer_na
     if (request_code < 0)
     {
         fprintf(stderr, "Inserire un codice valido\n");
+        return NULL;
+    }
+
+    if(customer_name == NULL)
+    {
+        fprintf(stderr, "Inserire un nome valido\n");
+        return NULL;
+    }
+
+    if(description == NULL)
+    {
+        fprintf(stderr, "Inserire una descrizione valida\n");
         return NULL;
     }
 
@@ -83,6 +106,12 @@ AssistanceRequest *create_assistance_request(int request_code, char *customer_na
     if (final_cost < 0.0f)
     {
         fprintf(stderr, "Inserire un costo finale valido\n");
+        return NULL;
+    }
+
+    if(!check_date(opening_date.day, opening_date.month, opening_date.year))
+    {
+        fprintf(stderr, "Inserire una data valida\n");
         return NULL;
     }
 
@@ -111,53 +140,107 @@ AssistanceRequest *create_assistance_request(int request_code, char *customer_na
     return assistance_request;
 }
 
-int get_request_code(AssistanceRequest *request)
+// GETTER
+
+int get_request_code(const AssistanceRequest *request)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore get_request_code: puntatore richiesta NULL\n");
+        return -1;
+    }
     return request->request_code;
 }
 
-char *get_customer_name(AssistanceRequest *request)
+const char *get_customer_name(const AssistanceRequest *request)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore get_customer_name: puntatore richiesta NULL\n");
+        return NULL;
+    }
     return request->customer_name;
 }
 
-DeviceType get_device_type(AssistanceRequest *request)
+DeviceType get_device_type(const AssistanceRequest *request)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore get_device_type: puntatore richiesta NULL\n");
+        return DEVICE_ERROR; 
+    }
     return request->device_type;
 }
 
-char *get_description(AssistanceRequest *request)
+const char *get_description(const AssistanceRequest *request)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore get_description: puntatore richiesta NULL\n");
+        return NULL;
+    }
     return request->description;
 }
 
-PriorityLevel get_priority_level(AssistanceRequest *request)
+PriorityLevel get_priority_level(const AssistanceRequest *request)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore get_priority_level: puntatore richiesta NULL\n");
+        return PRIORITY_ERROR;
+    }
     return request->priority_level;
 }
 
-RequestStatus get_request_status(AssistanceRequest *request)
+RequestStatus get_request_status(const AssistanceRequest *request)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore get_request_status: puntatore richiesta NULL\n");
+        return STATUS_ERROR;
+    }
     return request->request_status;
 }
 
-float get_estimated_cost(AssistanceRequest *request)
+float get_estimated_cost(const AssistanceRequest *request)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore get_estimated_cost: puntatore richiesta NULL\n");
+        return -1.0f;
+    }
     return request->estimated_cost;
 }
 
-float get_final_cost(AssistanceRequest *request)
+float get_final_cost(const AssistanceRequest *request)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore get_final_cost: puntatore richiesta NULL\n");
+        return -1.0f;
+    }
     return request->final_cost;
 }
 
-Date get_opening_date(AssistanceRequest *request)
+Date get_opening_date(const AssistanceRequest *request)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore get_opening_date: puntatore richiesta NULL\n");
+        return (Date){-1, -1, -1};
+    }
     return request->opening_date;
 }
 
+// SETTER
+
 int set_request_code(AssistanceRequest *request, int request_code)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore set_request_code: puntatore richiesta NULL\n");
+        return -1;
+    }
     if (request_code < 0)
     {
         fprintf(stderr, "Inserire un codice valido\n");
@@ -168,8 +251,13 @@ int set_request_code(AssistanceRequest *request, int request_code)
     return 0;
 }
 
-int set_customer_name(AssistanceRequest *request, char *customer_name)
+int set_customer_name(AssistanceRequest *request, const char *customer_name)
 {
+    if (request == NULL || customer_name == NULL)
+    {
+        fprintf(stderr, "Errore set_customer_name: uno o più parametri NULL\n");
+        return -1;
+    }
     if (strlen(customer_name) >= MAX_CUSTOMER_NAME)
     {
         fprintf(stderr, "Nome troppo lungo, verrà tagliato\n");
@@ -183,12 +271,22 @@ int set_customer_name(AssistanceRequest *request, char *customer_name)
 
 int set_device_type(AssistanceRequest *request, DeviceType device_type)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore set_device_type: puntatore richiesta NULL\n");
+        return -1;
+    }
     request->device_type = device_type;
     return 0;
 }
 
-int set_description(AssistanceRequest *request, char *description)
+int set_description(AssistanceRequest *request, const char *description)
 {
+    if (request == NULL || description == NULL)
+    {
+        fprintf(stderr, "Errore set_description: uno o più parametri NULL\n");
+        return -1;
+    }
     if (strlen(description) >= MAX_DESCRIPTION)
     {
         fprintf(stderr, "Descrizione troppo lunga, verrà tagliata\n");
@@ -202,18 +300,33 @@ int set_description(AssistanceRequest *request, char *description)
 
 int set_priority_level(AssistanceRequest *request, PriorityLevel priority_level)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore set_priority_level: puntatore richiesta NULL\n");
+        return -1;
+    }
     request->priority_level = priority_level;
     return 0;
 }
 
 int set_request_status(AssistanceRequest *request, RequestStatus request_status)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore set_request_status: puntatore richiesta NULL\n");
+        return -1;
+    }
     request->request_status = request_status;
     return 0;
 }
 
 int set_estimated_cost(AssistanceRequest *request, float estimated_cost)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore set_estimated_cost: puntatore richiesta NULL\n");
+        return -1;
+    }
     if (estimated_cost < 0.0f)
     {
         fprintf(stderr, "Costo stimato non valido\n");
@@ -226,6 +339,11 @@ int set_estimated_cost(AssistanceRequest *request, float estimated_cost)
 
 int set_final_cost(AssistanceRequest *request, float final_cost)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore set_final_cost: puntatore richiesta NULL\n");
+        return -1;
+    }
     if (final_cost < 0.0f)
     {
         fprintf(stderr, "Costo finale non valido\n");
@@ -238,6 +356,18 @@ int set_final_cost(AssistanceRequest *request, float final_cost)
 
 int set_opening_date(AssistanceRequest *request, Date opening_date)
 {
+    if (request == NULL)
+    {
+        fprintf(stderr, "Errore set_opening_date: puntatore richiesta NULL\n");
+        return -1;
+    }
+    
+    if (!check_date(opening_date.day, opening_date.month, opening_date.year))
+    {
+        fprintf(stderr, "Data non valida\n");
+        return -1;
+    }
+
     request->opening_date = opening_date;
     return 0;
 }

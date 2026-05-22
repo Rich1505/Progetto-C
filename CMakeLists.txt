@@ -12,28 +12,28 @@ FetchContent_Declare(
     GIT_TAG v1.16
 )
 
-FetchContent_GetProperties(civetweb)
 
-if(NOT civetweb_POPULATED)
-    FetchContent_Populate(civetweb)
+# Scarica e rende disponibili le proprietà del contenuto in un colpo solo
+FetchContent_MakeAvailable(civetweb)
 
-    add_library(civetweb
-        ${civetweb_SOURCE_DIR}/src/civetweb.c
-    )
+# Ora definisci la tua libreria custom usando i sorgenti scaricati
+add_library(civetweb
+    ${civetweb_SOURCE_DIR}/src/civetweb.c
+)
 
-    target_include_directories(civetweb PUBLIC
-        ${civetweb_SOURCE_DIR}/include
-    )
+target_include_directories(civetweb PUBLIC
+    ${civetweb_SOURCE_DIR}/include
+)
 
-    target_compile_definitions(civetweb PRIVATE
-        NO_SSL
-    )
+target_compile_definitions(civetweb PRIVATE
+    NO_SSL
+)
 
-    if(WIN32)
-        target_link_libraries(civetweb PUBLIC ws2_32)
-    endif()
+if(WIN32)
+    target_link_libraries(civetweb PUBLIC ws2_32)
 endif()
 
+# Sotto-progetti e target principale
 add_subdirectory(src/ware)
 add_subdirectory(src/cli)
 add_subdirectory(src/web)
