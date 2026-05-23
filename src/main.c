@@ -19,5 +19,7 @@ int main(void)
     int size = 0;
     AssistanceRequest **assistance_request = read_from_memory(&size);
 
+    write_in_memory(assistance_request, size);
+
     return 0;
 }

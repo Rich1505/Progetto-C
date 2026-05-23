@@ -63,6 +63,7 @@ AssistanceRequest **read_from_memory(int *out_size)
         if (token == NULL)
         {
             manage_error(array, size, fp);
+            fprintf(stderr, "Errore durante la tokenizzazione del file\n");
             return NULL;
         }
         int request_code = atoi(token);
@@ -71,6 +72,7 @@ AssistanceRequest **read_from_memory(int *out_size)
         if (token == NULL)
         {
             manage_error(array, size, fp);
+            fprintf(stderr, "Errore durante la tokenizzazione del file\n");
             return NULL;
         }
         char customer_name[MAX_CUSTOMER_NAME];
@@ -81,6 +83,7 @@ AssistanceRequest **read_from_memory(int *out_size)
         if (token == NULL)
         {
             manage_error(array, size, fp);
+            fprintf(stderr, "Errore durante la tokenizzazione del file\n");
             return NULL;
         }
         DeviceType device_type;
@@ -106,6 +109,7 @@ AssistanceRequest **read_from_memory(int *out_size)
         if (token == NULL)
         {
             manage_error(array, size, fp);
+            fprintf(stderr, "Errore durante la tokenizzazione del file\n");
             return NULL;
         }
         char description[MAX_DESCRIPTION];
@@ -116,6 +120,7 @@ AssistanceRequest **read_from_memory(int *out_size)
         if (token == NULL)
         {
             manage_error(array, size, fp);
+            fprintf(stderr, "Errore durante la tokenizzazione del file\n");
             return NULL;
         }
         PriorityLevel priority_level;
@@ -139,6 +144,7 @@ AssistanceRequest **read_from_memory(int *out_size)
         if (token == NULL)
         {
             manage_error(array, size, fp);
+            fprintf(stderr, "Errore durante la tokenizzazione del file\n");
             return NULL;
         }
         RequestStatus request_status;
@@ -162,6 +168,7 @@ AssistanceRequest **read_from_memory(int *out_size)
         if (token == NULL)
         {
             manage_error(array, size, fp);
+            fprintf(stderr, "Errore durante la tokenizzazione del file\n");
             return NULL;
         }
         float estimated_cost = atof(token);
@@ -170,6 +177,7 @@ AssistanceRequest **read_from_memory(int *out_size)
         if (token == NULL)
         {
             manage_error(array, size, fp);
+            fprintf(stderr, "Errore durante la tokenizzazione del file\n");
             return NULL;
         }
         float final_cost = atof(token);
@@ -178,6 +186,7 @@ AssistanceRequest **read_from_memory(int *out_size)
         if (token == NULL)
         {
             manage_error(array, size, fp);
+            fprintf(stderr, "Errore durante la tokenizzazione del file\n");
             return NULL;
         }
         int day = atoi(token);
@@ -186,6 +195,7 @@ AssistanceRequest **read_from_memory(int *out_size)
         if (token == NULL)
         {
             manage_error(array, size, fp);
+            fprintf(stderr, "Errore durante la tokenizzazione del file\n");
             return NULL;
         }
         int month = atoi(token);
@@ -194,6 +204,7 @@ AssistanceRequest **read_from_memory(int *out_size)
         if (token == NULL)
         {
             manage_error(array, size, fp);
+            fprintf(stderr, "Errore durante la tokenizzazione del file\n");
             return NULL;
         }
         int year = atoi(token);
@@ -230,4 +241,84 @@ AssistanceRequest **read_from_memory(int *out_size)
 
     *out_size = size;
     return array;
+}
+
+int write_in_memory(AssistanceRequest **array, int size)
+{
+    if (array == NULL && size > 0)
+    {
+        fprintf(stderr, "Errore: puntatore all'array NULL con dimensione maggiore di zero\n");
+        return -1;
+    }
+
+    FILE *fp = fopen("requests.txt", "w");
+
+    if (fp == NULL)
+    {
+        fprintf(stderr, "Errore apertura file in scrittura\n");
+        return -1;
+    }
+
+    for (int i = 0; i < size; i++)
+    {
+        if (array[i] == NULL)
+        {
+            fprintf(stderr, "Errore: rilevato puntatore NULL all'indice %d dell'array\n", i);
+            fclose(fp);
+            return -1;
+        }
+
+        DeviceType device_type = get_device_type(array[i]);
+        const char *device_str;
+
+        switch (device_type)
+        {
+        case DEVICE_SMARTPHONE:
+            device_str = "SMARTPHONE";
+            break;
+        case DEVICE_TABLET:
+            device_str = "TABLET";
+            break;
+        case DEVICE_LAPTOP:
+            device_str = "LAPTOP";
+            break;
+        case DEVICE_DESKTOP:
+            device_str = "DESKTOP";
+            break;
+        case DEVICE_PRINTER:
+            device_str = "PRINTER";
+            break;
+        default:
+            fprintf(stderr, "Errore: Tipo dispositivo non valido all'indice %d\n", i);
+            fclose(fp);
+            return -1;
+        }
+
+        Date opening_date = get_opening_date(array[i]);
+
+        int written = fprintf(fp, "%d;%s;%s;%s;%d;%d;%.2f;%.2f;%d;%d;%d\n",
+                              get_request_code(array[i]),
+                              get_customer_name(array[i]),
+                              device_str,
+                              get_description(array[i]),
+                              (int)get_priority_level(array[i]),
+                              (int)get_request_status(array[i]),
+                              get_estimated_cost(array[i]),
+                              get_final_cost(array[i]),
+                              opening_date.day,
+                              opening_date.month,
+                              opening_date.year);
+        
+        //negativo in caso di errore nella scrittura
+        if (written < 0)
+        {
+            fprintf(stderr, "Errore durante la scrittura su file all'indice %d\n", i);
+            fclose(fp);
+            return -1;
+        }
+    }
+
+    fclose(fp);
+
+    return 0;
 }
