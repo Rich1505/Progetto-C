@@ -65,22 +65,16 @@ float get_final_cost(const AssistanceRequest *request);
 Date get_opening_date(const AssistanceRequest *request);
 
 // SETTER
-int set_request_code(AssistanceRequest *request, int request_code);
-
-int set_customer_name(AssistanceRequest *request, const char *customer_name);
-
-int set_device_type(AssistanceRequest *request, DeviceType device_type);
-
 int set_description(AssistanceRequest *request, const char *description);
 
-int set_priority_level(AssistanceRequest *request, PriorityLevel priority_level);
+int set_request_status_opened(AssistanceRequest *request);
 
-int set_request_status(AssistanceRequest *request, RequestStatus request_status);
+int set_request_status_in_progress(AssistanceRequest *request);
+
+int set_request_status_closed(AssistanceRequest *request);
 
 int set_estimated_cost(AssistanceRequest *request, float estimated_cost);
 
 int set_final_cost(AssistanceRequest *request, float final_cost);
-
-int set_opening_date(AssistanceRequest *request, Date opening_date);
 
 #endif // WARE_H

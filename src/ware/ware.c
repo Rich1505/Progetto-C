@@ -234,52 +234,6 @@ Date get_opening_date(const AssistanceRequest *request)
 
 // SETTER
 
-int set_request_code(AssistanceRequest *request, int request_code)
-{
-    if (request == NULL)
-    {
-        fprintf(stderr, "Errore set_request_code: puntatore richiesta NULL\n");
-        return -1;
-    }
-    if (request_code < 0)
-    {
-        fprintf(stderr, "Inserire un codice valido\n");
-        return -1;
-    }
-
-    request->request_code = request_code;
-    return 0;
-}
-
-int set_customer_name(AssistanceRequest *request, const char *customer_name)
-{
-    if (request == NULL || customer_name == NULL)
-    {
-        fprintf(stderr, "Errore set_customer_name: uno o più parametri NULL\n");
-        return -1;
-    }
-    if (strlen(customer_name) >= MAX_CUSTOMER_NAME)
-    {
-        fprintf(stderr, "Nome troppo lungo, verrà tagliato\n");
-    }
-
-    strncpy(request->customer_name, customer_name, MAX_CUSTOMER_NAME - 1);
-    request->customer_name[MAX_CUSTOMER_NAME - 1] = '\0';
-
-    return 0;
-}
-
-int set_device_type(AssistanceRequest *request, DeviceType device_type)
-{
-    if (request == NULL)
-    {
-        fprintf(stderr, "Errore set_device_type: puntatore richiesta NULL\n");
-        return -1;
-    }
-    request->device_type = device_type;
-    return 0;
-}
-
 int set_description(AssistanceRequest *request, const char *description)
 {
     if (request == NULL || description == NULL)
@@ -298,25 +252,39 @@ int set_description(AssistanceRequest *request, const char *description)
     return 0;
 }
 
-int set_priority_level(AssistanceRequest *request, PriorityLevel priority_level)
+int set_request_status_opened(AssistanceRequest *request)
 {
-    if (request == NULL)
-    {
-        fprintf(stderr, "Errore set_priority_level: puntatore richiesta NULL\n");
-        return -1;
-    }
-    request->priority_level = priority_level;
-    return 0;
-}
-
-int set_request_status(AssistanceRequest *request, RequestStatus request_status)
-{
-    if (request == NULL)
+    if(request == NULL)
     {
         fprintf(stderr, "Errore set_request_status: puntatore richiesta NULL\n");
         return -1;
     }
-    request->request_status = request_status;
+
+    request->request_status = STATUS_OPEN;
+    return 0;
+}
+
+int set_request_status_in_progress(AssistanceRequest *request)
+{
+    if(request == NULL)
+    {
+        fprintf(stderr, "Errore set_request_status: puntatore richiesta NULL\n");
+        return -1;
+    }
+
+    request->request_status = STATUS_IN_PROGRESS;
+    return 0;
+}
+
+int set_request_status_closed(AssistanceRequest *request)
+{
+    if(request == NULL)
+    {
+        fprintf(stderr, "Errore set_request_status: puntatore richiesta NULL\n");
+        return -1;
+    }
+
+    request->request_status = STATUS_CLOSED;
     return 0;
 }
 
@@ -350,24 +318,12 @@ int set_final_cost(AssistanceRequest *request, float final_cost)
         return -1;
     }
 
+    if(request->request_status != STATUS_CLOSED)
+    {
+        fprintf(stderr, "Non puoi modificare il costo finale di una richiesta non completata!\n");
+        return -1;
+    }
+
     request->final_cost = final_cost;
-    return 0;
-}
-
-int set_opening_date(AssistanceRequest *request, Date opening_date)
-{
-    if (request == NULL)
-    {
-        fprintf(stderr, "Errore set_opening_date: puntatore richiesta NULL\n");
-        return -1;
-    }
-    
-    if (!check_date(opening_date.day, opening_date.month, opening_date.year))
-    {
-        fprintf(stderr, "Data non valida\n");
-        return -1;
-    }
-
-    request->opening_date = opening_date;
     return 0;
 }
