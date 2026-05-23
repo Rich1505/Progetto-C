@@ -5,21 +5,10 @@
 
 int main(void)
 {
-    FILE *fp = fopen("file.txt", "w");
 
-    if (fp == NULL)
-    {
-        printf("Errore apertura de manuel file\n");
-        return 1;
-    }
+    AssistanceRequestArray *assistance_request_array = read_from_memory();
 
-    fprintf(fp, "Ciao mondo\n");
-    fclose(fp);
-
-    int size = 0;
-    AssistanceRequest **assistance_request = read_from_memory(&size);
-
-    write_in_memory(assistance_request, size);
+    write_in_memory(assistance_request_array);
 
     return 0;
 }

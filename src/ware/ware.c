@@ -19,6 +19,13 @@ struct assistance_request
     Date opening_date;
 };
 
+struct assistance_request_array
+{
+    AssistanceRequest **array;
+    int size;
+    int capacity;
+};
+
 int is_leap_year(int year)
 {
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
@@ -140,6 +147,60 @@ AssistanceRequest *create_assistance_request(int request_code, char *customer_na
     return assistance_request;
 }
 
+int insert_assistance_request(AssistanceRequestArray *assistance_request_array, AssistanceRequest *assistance_request)
+{
+    if(assistance_request_array == NULL || assistance_request == NULL)
+    {
+        fprintf(stderr, "Errore insert_assistance_request: puntatore NULL\n");
+        return -1;
+    }
+
+    if(assistance_request_array->size == assistance_request_array->capacity)
+    {
+        int new_capacity = (assistance_request_array->capacity == 0) ? 4 : assistance_request_array->capacity * 2;
+        AssistanceRequest **tmp = realloc(assistance_request_array->array, new_capacity * sizeof(AssistanceRequest *));
+        if(tmp == NULL)
+        {
+            fprintf(stderr, "Errore insert_assistance_request: Allocazione memoria non riuscita\n");
+            return -1;
+        }
+
+        assistance_request_array->array = tmp;
+        assistance_request_array->capacity = new_capacity;
+    }
+
+    assistance_request_array->array[assistance_request_array->size] = assistance_request;
+    assistance_request_array->size = assistance_request_array->size + 1;
+    return 0;
+}
+
+AssistanceRequestArray *create_assistance_request_array(AssistanceRequest **array, int size, int capacity)
+{
+    if(array == NULL)
+    {
+        fprintf(stderr, "Errore create_assistance_request_array: puntatore array NULL\n");
+        return NULL;
+    }
+
+    if(capacity < size)
+    {
+        fprintf(stderr, "Errore create_assistance_request_array: size non può essere maggiore di capacity\n");
+        return NULL;
+    }
+
+    AssistanceRequestArray *assistance_request_array = malloc(sizeof(AssistanceRequestArray));
+    if(assistance_request_array == NULL)
+    {
+        fprintf(stderr, "Errore create_assistance_request_array: Errore allocazione memoria\n");
+        return NULL;
+    }
+    assistance_request_array->array = array;
+    assistance_request_array->size = size;
+    assistance_request_array->capacity = capacity;
+
+    return assistance_request_array;
+}
+
 // GETTER
 
 int get_request_code(const AssistanceRequest *request)
@@ -230,6 +291,39 @@ Date get_opening_date(const AssistanceRequest *request)
         return (Date){-1, -1, -1};
     }
     return request->opening_date;
+}
+
+AssistanceRequest **get_assistance_request_array_ptr(AssistanceRequestArray *assistance_request_array)
+{
+    if(assistance_request_array == NULL)
+    {
+        fprintf(stderr, "Errore get_assistance_request_array_ptr: Puntatore array NULL\n");
+        return NULL;
+    }
+
+    return assistance_request_array->array;
+}
+
+int get_assistance_request_array_size(AssistanceRequestArray *assistance_request_array)
+{
+    if(assistance_request_array == NULL)
+    {
+        fprintf(stderr, "Errore get_assistance_request_array_size: Puntatore array NULL\n");
+        return -1;
+    }
+
+    return assistance_request_array->size;
+}
+
+int get_assistance_request_array_capacity(AssistanceRequestArray *assistance_request_array)
+{
+    if(assistance_request_array == NULL)
+    {
+        fprintf(stderr, "Errore get_assistance_request_array_capacity: Puntatore array NULL\n");
+        return -1;
+    }
+
+    return assistance_request_array->capacity;
 }
 
 // SETTER

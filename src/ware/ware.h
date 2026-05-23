@@ -6,6 +6,7 @@
 #define WARE_INVALID_REQUEST_CODE -1
 
 typedef struct assistance_request AssistanceRequest;
+typedef struct assistance_request_array AssistanceRequestArray;
 
 typedef struct date
 {
@@ -45,6 +46,10 @@ Date create_date(int day, int month, int year);
 AssistanceRequest *create_assistance_request(int request_code, char *customer_name, DeviceType device_type, char *description,
                                              PriorityLevel priority_level, RequestStatus request_status, float estimated_cost, float final_cost, Date opening_date);
 
+AssistanceRequestArray *create_assistance_request_array(AssistanceRequest **array, int size, int capacity);
+
+int insert_assistance_request(AssistanceRequestArray *assistance_request_array, AssistanceRequest *assistance_request);
+
 // GETTER
 int get_request_code(const AssistanceRequest *request);
 
@@ -63,6 +68,12 @@ float get_estimated_cost(const AssistanceRequest *request);
 float get_final_cost(const AssistanceRequest *request);
 
 Date get_opening_date(const AssistanceRequest *request);
+
+AssistanceRequest **get_assistance_request_array_ptr(AssistanceRequestArray *assistance_request_array);
+
+int get_assistance_request_array_size(AssistanceRequestArray *assistance_request_array);
+
+int get_assistance_request_array_capacity(AssistanceRequestArray *assistance_request_array);
 
 // SETTER
 int set_description(AssistanceRequest *request, const char *description);

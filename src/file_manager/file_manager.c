@@ -19,7 +19,7 @@ void manage_error(AssistanceRequest **arr, int size, FILE *fp)
     fclose(fp);
 }
 
-AssistanceRequest **read_from_memory(int *out_size)
+AssistanceRequestArray *read_from_memory()
 {
     FILE *fp = fopen("requests.txt", "r");
 
@@ -237,17 +237,23 @@ AssistanceRequest **read_from_memory(int *out_size)
         array[size++] = assistance_request;
     }
 
+    AssistanceRequestArray *assistance_request_array = create_assistance_request_array(array, size, capacity);
+    if(assistance_request_array == NULL)
+    {
+        manage_error(array, size, fp);
+        return NULL;
+    }
+
     fclose(fp);
 
-    *out_size = size;
-    return array;
+    return assistance_request_array;
 }
 
-int write_in_memory(AssistanceRequest **array, int size)
+int write_in_memory(AssistanceRequestArray *assistance_request_array)
 {
-    if (array == NULL && size > 0)
+    if (assistance_request_array == NULL)
     {
-        fprintf(stderr, "Errore: puntatore all'array NULL con dimensione maggiore di zero\n");
+        fprintf(stderr, "Errore write_in_memory: puntatore NULL\n");
         return -1;
     }
 
@@ -258,6 +264,9 @@ int write_in_memory(AssistanceRequest **array, int size)
         fprintf(stderr, "Errore apertura file in scrittura\n");
         return -1;
     }
+
+    int size = get_assistance_request_array_size(assistance_request_array);
+    AssistanceRequest **array = get_assistance_request_array_ptr(assistance_request_array);
 
     for (int i = 0; i < size; i++)
     {

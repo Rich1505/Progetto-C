@@ -2,7 +2,7 @@
 #define FILE_MANAGER_H
 #include"ware.h"
 
-AssistanceRequest **read_from_memory(int *out_size);
-int write_in_memory(AssistanceRequest **array, int size);
+AssistanceRequestArray *read_from_memory();
+int write_in_memory(AssistanceRequestArray *array);
 
 #endif //FILE_MANAGER_H
