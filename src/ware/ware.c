@@ -174,6 +174,27 @@ int insert_assistance_request(AssistanceRequestArray *assistance_request_array, 
     return 0;
 }
 
+AssistanceRequest *copy_assistance_request(AssistanceRequest *src)
+{
+    if (src == NULL)
+    {
+        fprintf(stderr, "Errore copy_assistance_request: puntatore sorgente NULL\n");
+        return NULL;
+    }
+
+    return create_assistance_request(
+        get_request_code(src),
+        get_customer_name(src),
+        get_device_type(src),
+        get_description(src),
+        get_priority_level(src),
+        get_request_status(src),
+        get_estimated_cost(src),
+        get_final_cost(src),
+        get_opening_date(src)
+    );
+}
+
 AssistanceRequestArray *create_assistance_request_array(AssistanceRequest **array, int size, int capacity)
 {
     if(array == NULL)
@@ -199,6 +220,62 @@ AssistanceRequestArray *create_assistance_request_array(AssistanceRequest **arra
     assistance_request_array->capacity = capacity;
 
     return assistance_request_array;
+}
+
+AssistanceRequestArray *copy_assistance_request_array(AssistanceRequestArray *src)
+{
+    if(src == NULL)
+    {
+        fprintf(stderr, "Errore copy_assistance_request_array: puntatore NULL\n");
+        return NULL;
+    }
+
+    int capacity = get_assistance_request_array_capacity(src);
+    int size = get_assistance_request_array_size(src);
+    AssistanceRequest **original_arr = get_assistance_request_array_ptr(src);
+
+    AssistanceRequest **new_arr = malloc(capacity * sizeof(AssistanceRequest *));
+    for(int i = 0;i < size;i++)
+    {
+        new_arr[i] = copy_assistance_request(original_arr[i]);
+    }
+
+    AssistanceRequestArray *dest = malloc(sizeof(AssistanceRequestArray));
+    dest->array = new_arr;
+    dest->size = size;
+    dest->capacity = capacity;
+    
+    return dest;
+}
+
+void free_assistance_request(AssistanceRequest *request)
+{
+    if (request == NULL)
+    {
+        return;
+    }
+
+    free(request);
+}
+
+void free_assistance_request_array(AssistanceRequestArray *arr)
+{
+    if (arr == NULL)
+    {
+        return;
+    }
+
+    if (arr->array != NULL)
+    {
+        for (int i = 0; i < arr->size; i++)
+        {
+            free_assistance_request(arr->array[i]);
+        }
+
+        free(arr->array);
+    }
+
+    free(arr);
 }
 
 // GETTER

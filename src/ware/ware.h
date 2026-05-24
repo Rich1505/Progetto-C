@@ -50,6 +50,14 @@ AssistanceRequestArray *create_assistance_request_array(AssistanceRequest **arra
 
 int insert_assistance_request(AssistanceRequestArray *assistance_request_array, AssistanceRequest *assistance_request);
 
+AssistanceRequestArray *copy_assistance_request_array(AssistanceRequestArray *src);
+
+AssistanceRequest *copy_assistance_request(AssistanceRequest *src);
+
+void free_assistance_request(AssistanceRequest *request);
+
+void free_assistance_request_array(AssistanceRequestArray *arr);
+
 // GETTER
 int get_request_code(const AssistanceRequest *request);
 

@@ -1,0 +1,125 @@
+#include"sort.h"
+#include <string.h>
+#include<stdio.h>
+#include<stdlib.h>
+
+//I nostri comparatori restituiranno un valore < 0 se il primo elemento viene prima del secondo, 0 se sono uguali e > 0 se il secondo elemento viene prima del primo
+typedef int (*Comparator)(AssistanceRequest*, AssistanceRequest*);
+
+int compare_by_estimated_cost(AssistanceRequest *a, AssistanceRequest *b)
+{
+    float costo_a = get_estimated_cost(a);
+    float costo_b = get_estimated_cost(b);
+    
+    if (costo_a < costo_b) return -1;
+    if (costo_a > costo_b) return 1;
+    return 0;
+}
+
+int compare_by_customer_name(AssistanceRequest *a, AssistanceRequest *b)
+{
+    return strcmp(get_customer_name(a), get_customer_name(b));
+}
+
+int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp)
+{
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+
+    AssistanceRequest **L = (AssistanceRequest **)malloc(n1 * sizeof(AssistanceRequest *));
+    AssistanceRequest **R = (AssistanceRequest **)malloc(n2 * sizeof(AssistanceRequest *));
+    
+    if(L == NULL || R == NULL)
+    {
+        if (L != NULL) free(L);
+        
+        if (R != NULL) free(R);
+
+        fprintf(stderr, "Errore merge: allocazione memoria fallita\n");
+        return -1;
+    }
+    for (i = 0; i < n1; i++)
+        L[i] = arr[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[m + 1 + j];
+
+    i = 0;
+    j = 0;
+    k = l;
+
+    while (i < n1 && j < n2) {
+        if (comp(L[i], R[j]) <= 0) {
+            arr[k] = L[i];
+            i++;
+        }
+        else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+
+    free(L);
+    free(R);
+
+    return 0;
+}
+
+int mergeSort(AssistanceRequest **arr, int l, int r, Comparator comp)
+{
+    if (l < r) {
+        int m = l + (r - l) / 2;
+
+        if(mergeSort(arr, l, m, comp) == -1)
+            return -1;
+
+        if(mergeSort(arr, m + 1, r, comp) == -1)
+            return -1;
+
+        if(merge(arr, l, m, r, comp) == -1)
+            return -1;
+    }
+
+    return 0;
+}
+
+void sort_by_estimated_cost(AssistanceRequestArray *arr)
+{
+    if(arr == NULL)
+    {
+        fprintf(stderr, "Errore sort_by_estimated_cost: puntatore NULL\n");
+        return;
+    }
+
+    int size = get_assistance_request_array_size(arr);
+    if (size <= 1) return;
+
+    mergeSort(get_assistance_request_array_ptr(arr), 0, get_assistance_request_array_size(arr) - 1, compare_by_estimated_cost);
+}
+
+void sort_by_customer_name(AssistanceRequestArray *arr)
+{
+    if(arr == NULL)
+    {
+        fprintf(stderr, "Errore sort_by_customer_name: puntatore NULL\n");
+        return;
+    }
+
+    int size = get_assistance_request_array_size(arr);
+    if (size <= 1) return;
+
+    mergeSort(get_assistance_request_array_ptr(arr), 0, get_assistance_request_array_size(arr) - 1, compare_by_customer_name);
+}
