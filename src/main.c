@@ -3,6 +3,7 @@
 #include"sort.h"
 #include<stdlib.h>
 #include<stdio.h>
+#include"search.h"
 
 int main(void)
 {
@@ -13,6 +14,8 @@ int main(void)
     sort_by_estimated_cost(assistance_request_array);
 
     write_in_memory(assistance_request_array);
+
+    AssistanceRequest *req = search_by_request_code(assistance_request_array, 103);
 
     return 0;
 }

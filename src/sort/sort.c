@@ -78,15 +78,15 @@ int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp)
     return 0;
 }
 
-int mergeSort(AssistanceRequest **arr, int l, int r, Comparator comp)
+int merge_sort(AssistanceRequest **arr, int l, int r, Comparator comp)
 {
     if (l < r) {
         int m = l + (r - l) / 2;
 
-        if(mergeSort(arr, l, m, comp) == -1)
+        if(merge_sort(arr, l, m, comp) == -1)
             return -1;
 
-        if(mergeSort(arr, m + 1, r, comp) == -1)
+        if(merge_sort(arr, m + 1, r, comp) == -1)
             return -1;
 
         if(merge(arr, l, m, r, comp) == -1)
@@ -107,7 +107,7 @@ void sort_by_estimated_cost(AssistanceRequestArray *arr)
     int size = get_assistance_request_array_size(arr);
     if (size <= 1) return;
 
-    mergeSort(get_assistance_request_array_ptr(arr), 0, get_assistance_request_array_size(arr) - 1, compare_by_estimated_cost);
+    merge_sort(get_assistance_request_array_ptr(arr), 0, get_assistance_request_array_size(arr) - 1, compare_by_estimated_cost);
 }
 
 void sort_by_customer_name(AssistanceRequestArray *arr)
@@ -121,5 +121,5 @@ void sort_by_customer_name(AssistanceRequestArray *arr)
     int size = get_assistance_request_array_size(arr);
     if (size <= 1) return;
 
-    mergeSort(get_assistance_request_array_ptr(arr), 0, get_assistance_request_array_size(arr) - 1, compare_by_customer_name);
+    merge_sort(get_assistance_request_array_ptr(arr), 0, get_assistance_request_array_size(arr) - 1, compare_by_customer_name);
 }
