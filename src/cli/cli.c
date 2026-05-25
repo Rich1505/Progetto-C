@@ -1,71 +1,89 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include"cli.h"
 #include"ware.h"
 #include"file_manager.h"
 
 static void print_menu(void);
-static void request_managment(AssistanceRequest *list);
-static void search_filter(AssistanceRequest *list);
-static void sort(AssistanceRequest *list);
-static void statistics(AssistanceRequest *list);
-static void reprt(AssistanceRequest *list);
-static void save_load(AssistanceRequest *list);
+static int read_int(const char *prompt);
+static float read_float(const char *prompt);
+static void read_string(const char *prompt, char *buffer, int size);
 
-static int read_integer(const char *prompt);
-static void read_string(const char *prompt, char *buffer, size_t size);
-static double read_double(const char *prompt);
-static void wait_for_enter(void);
+static const char *device_to_string(DeviceType type);
+static const char *priority_to_string(PriorityLevel level);
+static const char *status_to_string(RequestStatus status);
 
-static void insert_request(AssistanceRequest *list);
-static void update_cost(AssistanceRequest *list);
-static void edit_request(AssistanceRequest *list);
-static void delete_request(AssistanceRequest *list);
-static void show_request(AssistanceRequest *list);
+static DeviceType read_device_type(void);
+static PriorityLevel read_priority_level(void);
+static RequestStatus read_status(void);
 
+static AssistanceRequest *find_request_by_code(AssistanceRequestArray *list, int code);
+
+static void show_all_requests(AssistanceRequestArray *list);
+static void insert_request_cli(AssistanceRequestArray *list);
+static void update_status_cli(AssistanceRequestArray *list);
+static void update_estimated_cost_cli(AssistanceRequestArray *list);
+static void update_final_cost_cli(AssistanceRequestArray *list);
+
+//tutte le funzioni del menu 
 void show_startup_screen(void)
-{
-    printf("===========================================================\n");
-    printf("      CENTRO ASSISTENZA TECNICA - GESTIONE RICHIESTE       \n");
-    printf("===========================================================\n");
-    printf("Benvenuto nel sistema di gestione delle richieste di assistenza tecnica!\n");
-    printf("Le funzionalità principali includono:\n");
-    printf("1. Gestione delle richieste: Inserimento, Modifica, Cancellazione, Visualizzazione\n");
-    printf("2. Ricerca e Filtro: Ricerca per codice, nome cliente, tipo di dispositivo, priorità, stato\n");
-    printf("3. Ordinamento: Ordinamento per codice, nome cliente, tipo di dispositivo, priorità, stato\n");
-    printf("4. Statistiche: Numero totale di richieste, richieste per tipo di dispositivo, richieste per priorità, richieste per stato\n");
-    printf("5. Report: Generazione di report dettagliati in formato testo\n");
-}
+ {
+     printf("===========================================================\n");
+     printf("      CENTRO ASSISTENZA TECNICA - GESTIONE RICHIESTE       \n");
+     printf("===========================================================\n");
+     printf("Benvenuto nel sistema di gestione delle richieste di assistenza tecnica!\n");
+     printf("Le funzionalità principali includono:\n");
+     printf("1. Gestione delle richieste: Inserimento, Modifica, Cancellazione, Visualizzazione\n");
+     printf("2. Ricerca e Filtro: Ricerca per codice, nome cliente, tipo di dispositivo, priorità, stato\n");
+     printf("3. Ordinamento: Ordinamento per codice, nome cliente, tipo di dispositivo, priorità, stato\n");
+     printf("4. Statistiche: Numero totale di richieste, richieste per tipo di dispositivo, richieste per priorità, richieste per stato\n");
+     printf("5. Report: Generazione di report dettagliati in formato testo\n");
+ }
 
-void run_main_menu(AssistanceRequest *list)
+void run_main_menu(AssistanceRequest *list) //questa funzione gestisce il menu principale, mostrando le opzioni e chiamando le funzioni corrispondenti in base alla scelta dell'utente.
 {
     int choice;
+
+       if (list == NULL) {
+            show_error_message("Lista richieste non valida.");
+            return;
+        }
 
     do
     {
         print_menu();
-        choice = read_integer("Seleziona un'opzione: ");
+        choice = read_int("Seleziona un'opzione: ");
 
         switch (choice)
         {
             case 1:
-                request_managment(list);
+                show_all_requests(list);
                 break;
             case 2:
-                search_filter(list);
+                insert_request_cli(list);
                 break;
             case 3:
-                sort(list);
+                update_status_cli(list);
                 break;
             case 4:
-                statistics(list);
+                update_estimated_cost_cli(list);
                 break;
             case 5:
-                reprt(list);
+                update_final_cost_cli(list);
                 break;
             case 6:
-                save_load(list);
+                sort_by_customer_name(list);
+                show_success_message("Ordinamento per nome completato.");
+                break;
+            case 7:
+                sort_by_estimated_cost(list);
+                show_success_message("Ordinamento per costo stimato completato.");
+                break;
+            case 8: 
+                if (write_in_memory(list) == 0)
+                show_success_message("Salvataggio completato.");
+                else
+                show_error_message("Errore durante il salvataggio.");
                 break;
             case 0:
                 printf("Uscita in corso...\n");
@@ -74,60 +92,382 @@ void run_main_menu(AssistanceRequest *list)
                 show_error_message("Opzione non valida. Inserisci un numero valido del menu.");
         }
     } while (choice != 0);
+
 }
 
+void show_error_message(const char *message)
+{
+    printf("[ERRORE] %s\n", message);
+}
+
+void show_success_message(const char *message)
+{
+    printf("[OK] %s\n", message);
+}
+
+void show_request_message(const AssistanceRequest *request)
+{
+    Date data;
+
+    if (request == NULL) {
+        show_error_message("Richiesta non valida.");
+        return;
+    }
+
+    data = get_opening_date(request);
+
+    printf("--------------------------------------------\n");
+    printf("Codice: %d\n", get_request_code(request));
+    printf("Cliente: %s\n", get_customer_name(request));
+    printf("Dispositivo: %s\n", device_to_string(get_device_type(request)));
+    printf("Descrizione: %s\n", get_description(request));
+    printf("Priorita: %s\n", priority_to_string(get_priority_level(request)));
+    printf("Stato: %s\n", status_to_string(get_request_status(request)));
+    printf("Costo stimato: %.2f\n", get_estimated_cost(request));
+    printf("Costo finale: %.2f\n", get_final_cost(request));
+    printf("Data apertura: %02d/%02d/%04d\n",data.day, data.month, data.year);
+    printf("--------------------------------------------\n");
+}
 void print_menu(void)
 {
-    printf("\n====== Menu Principale ======\n");
-    printf("1. Gestione Richieste\n");
-    printf("2. Ricerca e Filtro\n");
-    printf("3. Ordinamento\n");
-    printf("4. Statistiche\n");
-    printf("5. Report\n");
-    printf("6. Salvataggio e Caricamento\n");
+    printf("\n====== MENU PRINCIPALE ======\n");
+    printf("1. Visualizza tutte le richieste\n");
+    printf("2. Inserisci nuova richiesta\n");
+    printf("3. Aggiorna stato richiesta\n");
+    printf("4. Aggiorna costo stimato\n");
+    printf("5. Aggiorna costo finale\n");
+    printf("6. Ordina per nome cliente\n");
+    printf("7. Ordina per costo stimato\n");
+    printf("8. Salva su file\n");
     printf("0. Esci\n");
     printf("\n=============================\n");
 }
 
-static void request_managment(AssistanceRequest *list)
+//questi sono input, gestendo anche il buffer per evitare problemi con input misti (numerici e stringhe).
+
+static int read_int(const char *prompt)
+{
+    int value;
+    printf("%s", prompt);
+    scanf("%d", &value);
+    while (getchar() != '\n');
+    return value;
+}
+    
+static float read_float(const char *prompt)
+{
+    float value;
+    printf("%s", prompt);
+    scanf("%f", &value);
+    while (getchar() != '\n');
+    return value;
+}
+    
+static void read_string(const char *prompt, char *buffer, int size)
+{
+    printf("%s", prompt);
+    fgets(buffer, size, stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+}
+//il buffer serve a pulire eventuali caratteri residui dopo la lettura di un numero, evitando che interferiscano con le letture successive di stringhe.
+
+
+//questo è per convertire i tipi enum in stringhe leggibili, utile per la visualizzazione delle richieste.
+
+static const char *device_to_string(DeviceType type) //questa funzione converte i tipi di dispositivo in stringhe leggibili.
+{
+    switch (type) {
+        case DEVICE_SMARTPHONE: return "SMARTPHONE";
+        case DEVICE_TABLET:     return "TABLET";
+        case DEVICE_LAPTOP:     return "LAPTOP";
+        case DEVICE_DESKTOP:    return "DESKTOP";
+        case DEVICE_PRINTER:    return "PRINTER";
+        default:                return "ERRORE";
+    }
+}
+
+static const char *priority_to_string(PriorityLevel level) //questa funzione converte i livelli di priorità in stringhe leggibili.
+{
+    switch (level) {
+        case PRIORITY_LOW:    return "LOW";
+        case PRIORITY_MEDIUM: return "MEDIUM";
+        case PRIORITY_HIGH:   return "HIGH";
+        default:              return "ERRORE";
+    }
+}
+
+static const char *status_to_string(RequestStatus status) //questa funzione converte gli stati delle richieste in stringhe leggibili.
+{
+    switch (status) {
+        case STATUS_OPEN:        return "OPEN";
+        case STATUS_IN_PROGRESS: return "IN_PROGRESS";
+        case STATUS_CLOSED:      return "CLOSED";
+        default:                 return "ERRORE";
+    }
+}
+
+//queste funzioni leggono i valori di tipo enum, restituendo il valore corrispondente o un valore di errore se la scelta non è valida.
+
+static DeviceType read_device_type(void) //questa legge il tipo di dispositivo scelto dall'utente, restituendo il valore enum corrispondente o un valore di errore se la scelta non è valida.
 {
     int choice;
 
-    do
-    {
-        printf("\n======== Gestione Richieste ======\n");
-        printf("1. Inserisci Nuova Richiesta\n");
-        printf("2. Aggiorna Costo Finale\n");
-        printf("3. Modifica Richiesta\n");
-        printf("4. Elimina Richiesta\n");
-        printf("5. Visualizza Dettagli Richiesta\n");
-        printf("0. Torna al Menu Principale\n");
-        printf("\n==================================\n");
-        
-        choice = read_integer("Seleziona un'opzione: ");
-        
-        switch (choice)
-        {
-            case 1:
-                insert_request(list);
-                break;
-            case 2:
-                update_cost(list);
-                break;
-            case 3:
-                edit_request(list);
-                break;
-            case 4:
-                delete_request(list);
-                break;
-            case 5:
-                show_request(list);
-                break;
-            case 0:
-                printf("Ritorno al menu principale...\n");
-                break;
-            default:
-                show_error_message("Opzione non valida. Inserisci un numero valido del menu.");
-        }
-    } while (choice != 0);
+    printf("Tipo dispositivo:\n");
+    printf("1. Smartphone\n");
+    printf("2. Tablet\n");
+    printf("3. Laptop\n");
+    printf("4. Desktop\n");
+    printf("5. Printer\n");
+
+    choice = read_int("Scelta: ");
+
+    switch (choice) {
+        case 1: return DEVICE_SMARTPHONE;
+        case 2: return DEVICE_TABLET;
+        case 3: return DEVICE_LAPTOP;
+        case 4: return DEVICE_DESKTOP;
+        case 5: return DEVICE_PRINTER;
+        default: return DEVICE_ERROR;
+    }
 }
+
+static PriorityLevel read_priority_level(void) //questa legge il livello di priorità scelto dall'utente, restituendo il valore enum corrispondente o un valore di errore se la scelta non è valida.
+{
+    int choice;
+
+    printf("Priorita:\n");
+    printf("1. Low\n");
+    printf("2. Medium\n");
+    printf("3. High\n");
+
+    choice = read_int("Scelta: ");
+
+    switch (choice) {
+        case 1: return PRIORITY_LOW;
+        case 2: return PRIORITY_MEDIUM;
+        case 3: return PRIORITY_HIGH;
+        default: return PRIORITY_ERROR;
+    }
+}
+
+static RequestStatus read_status(void) //questa legge lo stato della richiesta scelto dall'utente, restituendo il valore enum corrispondente o un valore di errore se la scelta non è valida.
+{
+    int choice;
+
+    printf("Stato richiesta:\n");
+    printf("1. Open\n");
+    printf("2. In progress\n");
+    printf("3. Closed\n");
+
+    choice = read_int("Scelta: ");
+
+    switch (choice) {
+        case 1: return STATUS_OPEN;
+        case 2: return STATUS_IN_PROGRESS;
+        case 3: return STATUS_CLOSED;
+        default: return STATUS_ERROR;
+    }
+}
+
+//questa funzione cerca una richiesta per codice, restituendo un puntatore alla richiesta se trovata o NULL se non trovata o in caso di errori. 
+//Viene utilizzata nelle funzioni di aggiornamento per identificare la richiesta da modificare.
+
+static AssistanceRequest *find_request_by_code(
+    AssistanceRequestArray *list,
+    int code
+)
+{
+    AssistanceRequest **array;
+    int size;
+
+    if (list == NULL)
+        return NULL;
+
+    array = get_assistance_request_array_ptr(list);
+    size = get_assistance_request_array_size(list);
+
+    if (array == NULL || size < 0)
+        return NULL;
+
+    for (int i = 0; i < size; i++) {
+        if (get_request_code(array[i]) == code) {
+            return array[i];
+        }
+    }
+
+    return NULL;
+
+}
+
+//questa funzione mostra tutte le richieste presenti nella lista, 
+//utilizzando la funzione show_request_message per visualizzare i dettagli di ogni richiesta. 
+//Se la lista è vuota o non valida, viene mostrato un messaggio di errore.
+
+static void show_all_requests(AssistanceRequestArray *list)
+{
+    AssistanceRequest **array;
+    int size;
+
+    array = get_assistance_request_array_ptr(list);
+    size = get_assistance_request_array_size(list);
+
+    if (array == NULL || size <= 0) {
+        printf("Nessuna richiesta presente.\n");
+        return;
+    }
+
+    for (int i = 0; i < size; i++) {
+        show_request_message(array[i]);
+    }
+}
+
+static void insert_request_cli(AssistanceRequestArray *list)
+{
+    int code;
+    char customer_name[MAX_CUSTOMER_NAME];
+    char description[MAX_DESCRIPTION];
+    DeviceType type;
+    PriorityLevel priority;
+    float estimated_cost;
+    Date date;
+    AssistanceRequest *new_request;
+
+    code = read_int("Codice richiesta: ");
+    read_string("Nome cliente: ", customer_name, MAX_CUSTOMER_NAME);
+
+    type = read_device_type();
+    if (type == DEVICE_ERROR) {
+        show_error_message("Tipo dispositivo non valido.");
+        return;
+    }
+
+    read_string("Descrizione: ", description, MAX_DESCRIPTION);
+
+    priority = read_priority_level();
+    if (priority == PRIORITY_ERROR) {
+        show_error_message("Priorita non valida.");
+        return;
+    }
+
+    estimated_cost = read_float("Costo stimato: ");
+
+    date = create_date(
+        read_int("Giorno: "),
+        read_int("Mese: "),
+        read_int("Anno: ")
+    );
+
+    if (date.day == -1) {
+        show_error_message("Data non valida.");
+        return;
+    }
+
+    new_request = create_assistance_request(
+        code,
+        customer_name,
+        type,
+        description,
+        priority,
+        STATUS_OPEN,
+        estimated_cost,
+        0.0f,
+        date
+    );
+
+    if (new_request == NULL) {
+        show_error_message("Creazione richiesta fallita.");
+        return;
+    }
+
+    if (insert_assistance_request(list, new_request) == 0)
+        show_success_message("Richiesta inserita correttamente.");
+    else {
+        free_assistance_request(new_request);
+        show_error_message("Inserimento fallito.");
+    }
+}
+
+static void update_status_cli(AssistanceRequestArray *list)
+{
+    int code;
+    RequestStatus newStatus;
+    AssistanceRequest *request;
+    int result = -1;
+
+    code = read_int("Codice richiesta da aggiornare: ");
+    request = find_request_by_code(list, code);
+
+    if (request == NULL) {
+        show_error_message("Richiesta non trovata.");
+        return;
+    }
+
+    newStatus = read_status();
+
+    switch (newStatus) {
+        case STATUS_OPEN:
+            result = set_request_status_opened(request);
+            break;
+        case STATUS_IN_PROGRESS:
+            result = set_request_status_in_progress(request);
+            break;
+        case STATUS_CLOSED:
+            result = set_request_status_closed(request);
+            break;
+        default:
+            show_error_message("Stato non valido.");
+            return;
+    }
+
+    if (result == 0)
+        show_success_message("Stato aggiornato.");
+    else
+        show_error_message("Aggiornamento stato fallito.");
+}
+
+static void update_estimated_cost_cli(AssistanceRequestArray *list)
+{
+    int code;
+    float cost;
+    AssistanceRequest *request;
+
+    code = read_int("Codice richiesta: ");
+    request = find_request_by_code(list, code);
+
+    if (request == NULL) {
+        show_error_message("Richiesta non trovata.");
+        return;
+    }
+
+    cost = read_float("Nuovo costo stimato: ");
+
+    if (set_estimated_cost(request, cost) == 0)
+        show_success_message("Costo stimato aggiornato.");
+    else
+        show_error_message("Aggiornamento costo stimato fallito.");
+}
+
+static void update_final_cost_cli(AssistanceRequestArray *list)
+{
+    int code;
+    float cost;
+    AssistanceRequest *request;
+
+    code = read_int("Codice richiesta: ");
+    request = find_request_by_code(list, code);
+
+    if (request == NULL) {
+        show_error_message("Richiesta non trovata.");
+        return;
+    }
+
+    cost = read_float("Nuovo costo finale: ");
+
+    if (set_final_cost(request, cost) == 0)
+        show_success_message("Costo finale aggiornato.");
+    else
+        show_error_message(
+            "Aggiornamento costo finale fallito "
+            "(richiesta non chiusa o valore non valido)."
+        );
+}   

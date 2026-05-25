@@ -4,7 +4,6 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include"search.h"
-
 int main(void)
 {
 

@@ -3,9 +3,9 @@
 #include"ware.h"
 
 void show_startup_screen(void);
-void run_main_menu(AssistanceRequest *list);
+void run_main_menu(AssistanceRequestArray *list);
 void show_error_message(const char *message);
 void show_success_message(const char *message);
-void show_request_message(const char *message);
+void show_request_message(const AssistanceRequest *request);
 
 #endif //CLI_H
