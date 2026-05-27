@@ -3,6 +3,7 @@
 #include"cli.h"
 #include"ware.h"
 #include"file_manager.h"
+#include"sort.h"
 
 static void print_menu(void);
 static int read_int(const char *prompt);
@@ -40,7 +41,7 @@ void show_startup_screen(void)
      printf("5. Report: Generazione di report dettagliati in formato testo\n");
  }
 
-void run_main_menu(AssistanceRequest *list) //questa funzione gestisce il menu principale, mostrando le opzioni e chiamando le funzioni corrispondenti in base alla scelta dell'utente.
+void run_main_menu(AssistanceRequestArray *list) //questa funzione gestisce il menu principale, mostrando le opzioni e chiamando le funzioni corrispondenti in base alla scelta dell'utente.
 {
     int choice;
 
