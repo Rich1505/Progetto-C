@@ -25,8 +25,22 @@ AssistanceRequestArray *read_from_memory()
 
     if (fp == NULL)
     {
-        fprintf(stderr, "Errore apertura file\n");
-        return NULL;
+        printf("File 'requests.txt' non trovato. Creazione in corso...\n");
+        
+        fp = fopen("requests.txt", "w");
+        if (fp == NULL)
+        {
+            fprintf(stderr, "Errore fatale: impossibile creare il file di memoria.\n");
+            return NULL;
+        }
+        
+        fclose(fp);
+        
+        fp = fopen("requests.txt", "r");
+        if (fp == NULL)
+        {
+            return NULL; 
+        }
     }
 
     int capacity = 10;
@@ -34,9 +48,9 @@ AssistanceRequestArray *read_from_memory()
 
     AssistanceRequest **array = malloc(capacity * sizeof(AssistanceRequest *));
 
-    char line[1024];
+    char line[LINE_LENGTH];
 
-    while (fgets(line, sizeof(line), fp))
+    while (fgets(line, LINE_LENGTH, fp))
     {
         if (size == capacity)
         {
