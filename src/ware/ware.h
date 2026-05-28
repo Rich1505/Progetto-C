@@ -79,7 +79,7 @@ Date get_opening_date(const AssistanceRequest *request);
 
 AssistanceRequest **get_assistance_request_array_ptr(AssistanceRequestArray *assistance_request_array);
 
-int get_assistance_request_array_size(AssistanceRequestArray *assistance_request_array);
+int get_assistance_request_array_size(const AssistanceRequestArray * const assistance_request_array);
 
 int get_assistance_request_array_capacity(AssistanceRequestArray *assistance_request_array);
 

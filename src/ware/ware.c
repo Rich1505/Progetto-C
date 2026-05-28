@@ -381,7 +381,7 @@ AssistanceRequest **get_assistance_request_array_ptr(AssistanceRequestArray *ass
     return assistance_request_array->array;
 }
 
-int get_assistance_request_array_size(AssistanceRequestArray *assistance_request_array)
+int get_assistance_request_array_size(const AssistanceRequestArray * const assistance_request_array)
 {
     if(assistance_request_array == NULL)
     {
