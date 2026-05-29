@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include"cli.h"
 #include"ware.h"
 #include"file_manager.h"
@@ -9,6 +10,9 @@ static void print_menu(void);
 static int read_int(const char *prompt);
 static float read_float(const char *prompt);
 static void read_string(const char *prompt, char *buffer, int size);
+static void read_name(const char *prompt,char *buffer,int size);
+static int has_digit(const char *string);
+static AssistanceRequest *read_existing_request(AssistanceRequestArray *list);
 
 static const char *device_to_string(DeviceType type);
 static const char *priority_to_string(PriorityLevel level);
@@ -149,26 +153,79 @@ void print_menu(void)
 static int read_int(const char *prompt)
 {
     int value;
-    printf("%s", prompt);
-    scanf("%d", &value);
-    while (getchar() != '\n');
-    return value;
+    char row[100];
+    char extra;
+
+    while (1) {
+        printf("%s", prompt);
+        fgets(row, sizeof(row), stdin);
+
+        if (sscanf(row, "%d %c", &value, &extra) == 1) {
+            return value;
+        }
+
+        show_error_message("Inserisci un numero intero valido.");
+    }
 }
     
 static float read_float(const char *prompt)
 {
     float value;
-    printf("%s", prompt);
-    scanf("%f", &value);
-    while (getchar() != '\n');
-    return value;
+    char row[100];
+    char extra;
+
+    while (1) {
+        printf("%s", prompt);
+        fgets(row, sizeof(row), stdin);
+
+        if (sscanf(row, "%f %c", &value, &extra) == 1) {
+            return value;
+        }
+
+        show_error_message("Inserisci un numero valido.");
+    }
 }
     
 static void read_string(const char *prompt, char *buffer, int size)
 {
-    printf("%s", prompt);
-    fgets(buffer, size, stdin);
-    buffer[strcspn(buffer, "\n")] = '\0';
+    while (1) {
+        printf("%s", prompt);
+        fgets(buffer, size, stdin);
+        buffer[strcspn(buffer, "\n")] = '\0';
+
+        if (strlen(buffer) > 0) {
+            return;
+        }
+
+        show_error_message("Il campo non puo' essere vuoto.");
+    }
+}
+
+static int has_digit(const char *string)
+{
+    int i = 0;
+
+    while (string[i] != '\0') {
+        if (isdigit((unsigned char)string[i])) {
+            return 1;
+        }
+        i++;
+    }
+
+    return 0;
+}
+
+static void read_name(const char *prompt, char *buffer, int size)
+{
+    while (1) {
+        read_string(prompt, buffer, size);
+
+        if (!has_digit(buffer)) {
+            return;
+        }
+
+        show_error_message("Il nome non puo' contenere numeri.");
+    }
 }
 //il buffer serve a pulire eventuali caratteri residui dopo la lettura di un numero, evitando che interferiscano con le letture successive di stringhe.
 
@@ -228,7 +285,7 @@ static DeviceType read_device_type(void) //questa legge il tipo di dispositivo s
         case 3: return DEVICE_LAPTOP;
         case 4: return DEVICE_DESKTOP;
         case 5: return DEVICE_PRINTER;
-        default: return DEVICE_ERROR;
+        default: show_error_message("Tipo dispositivo non valido.");
     }
 }
 
@@ -247,7 +304,7 @@ static PriorityLevel read_priority_level(void) //questa legge il livello di prio
         case 1: return PRIORITY_LOW;
         case 2: return PRIORITY_MEDIUM;
         case 3: return PRIORITY_HIGH;
-        default: return PRIORITY_ERROR;
+        default: show_error_message("Priorita non valida.");
     }
 }
 
@@ -266,7 +323,7 @@ static RequestStatus read_status(void) //questa legge lo stato della richiesta s
         case 1: return STATUS_OPEN;
         case 2: return STATUS_IN_PROGRESS;
         case 3: return STATUS_CLOSED;
-        default: return STATUS_ERROR;
+        default: show_error_message("Stato non valido.");
     }
 }
 
@@ -298,6 +355,28 @@ static AssistanceRequest *find_request_by_code(
 
     return NULL;
 
+}
+
+static AssistanceRequest *read_existing_request(AssistanceRequestArray *list) //questa funzione legge un codice di richiesta esistente, restituendo un puntatore alla richiesta se trovata o NULL se non trovata o in caso di errori. 
+{
+    int code;
+    AssistanceRequest *request;
+
+    while (1) {
+        code = read_int("Codice richiesta: ");
+        
+        if (code == -1) {
+            return NULL;
+        }
+
+        request = find_request_by_code(list, code);
+
+        if (request != NULL) {
+            return request;
+        }
+
+        show_error_message("Richiesta non trovata. Inserisci un codice valido.");
+    }
 }
 
 //questa funzione mostra tutte le richieste presenti nella lista, 
@@ -333,35 +412,44 @@ static void insert_request_cli(AssistanceRequestArray *list)
     Date date;
     AssistanceRequest *new_request;
 
-    code = read_int("Codice richiesta: ");
+    do
+    {
+        code = read_int("Codice richiesta: ");
+        if (code < 0)
+        {
+            show_error_message("Il codice deve essere un numero intero positivo.");
+        }
+    } while (code < 0);
     read_string("Nome cliente: ", customer_name, MAX_CUSTOMER_NAME);
 
     type = read_device_type();
-    if (type == DEVICE_ERROR) {
-        show_error_message("Tipo dispositivo non valido.");
-        return;
-    }
 
     read_string("Descrizione: ", description, MAX_DESCRIPTION);
 
     priority = read_priority_level();
-    if (priority == PRIORITY_ERROR) {
-        show_error_message("Priorita non valida.");
-        return;
-    }
 
-    estimated_cost = read_float("Costo stimato: ");
+    do
+    {
+        estimated_cost = read_float("Costo stimato: ");
+        if (estimated_cost < 0)
+        {
+            show_error_message("Il costo stimato deve essere un numero positivo.");
+        }
+    } while (estimated_cost < 0);
 
-    date = create_date(
-        read_int("Giorno: "),
-        read_int("Mese: "),
-        read_int("Anno: ")
-    );
+    do
+    {
+        int day = read_int("Giorno: ");
+        int month = read_int("Mese: ");
+        int year = read_int("Anno: ");
 
-    if (date.day == -1) {
-        show_error_message("Data non valida.");
-        return;
-    }
+        date = create_date(day, month, year);
+
+        if (date.day == -1)
+        {
+            show_error_message("Data non valida.");
+        }
+    } while (date.day == -1);
 
     new_request = create_assistance_request(
         code,
@@ -390,57 +478,60 @@ static void insert_request_cli(AssistanceRequestArray *list)
 
 static void update_status_cli(AssistanceRequestArray *list)
 {
-    int code;
     RequestStatus newStatus;
     AssistanceRequest *request;
     int result = -1;
 
-    code = read_int("Codice richiesta da aggiornare: ");
-    request = find_request_by_code(list, code);
+    request = read_existing_request(list);
 
-    if (request == NULL) {
-        show_error_message("Richiesta non trovata.");
+    if (request == NULL)
+    {
+        show_error_message("Operazione annullata.");
         return;
     }
 
     newStatus = read_status();
 
-    switch (newStatus) {
-        case STATUS_OPEN:
-            result = set_request_status_opened(request);
-            break;
-        case STATUS_IN_PROGRESS:
-            result = set_request_status_in_progress(request);
-            break;
-        case STATUS_CLOSED:
-            result = set_request_status_closed(request);
-            break;
-        default:
-            show_error_message("Stato non valido.");
-            return;
-    }
+    switch (newStatus)
+    {
+    case STATUS_OPEN:
+        result = set_request_status_opened(request);
+        break;
+    case STATUS_IN_PROGRESS:
+        result = set_request_status_in_progress(request);
+        break;
+    case STATUS_CLOSED:
+        result = set_request_status_closed(request);
+        break;
+    default:
+        result = -1;
 
-    if (result == 0)
-        show_success_message("Stato aggiornato.");
-    else
-        show_error_message("Aggiornamento stato fallito.");
+        if (result == 0)
+            show_success_message("Stato aggiornato.");
+        else
+            show_error_message("Aggiornamento stato fallito.");
+    }
 }
 
 static void update_estimated_cost_cli(AssistanceRequestArray *list)
 {
-    int code;
     float cost;
     AssistanceRequest *request;
 
-    code = read_int("Codice richiesta: ");
-    request = find_request_by_code(list, code);
+    request = read_existing_request(list);
 
     if (request == NULL) {
-        show_error_message("Richiesta non trovata.");
+        show_error_message("Operazione annullata.");
         return;
     }
-
-    cost = read_float("Nuovo costo stimato: ");
+    do
+    {
+        cost = read_float("Nuovo costo stimato: ");
+        if (cost < 0)
+        {
+            show_error_message("Il costo stimato deve essere un numero positivo.");
+        }
+    } while (cost < 0);
 
     if (set_estimated_cost(request, cost) == 0)
         show_success_message("Costo stimato aggiornato.");
@@ -450,12 +541,11 @@ static void update_estimated_cost_cli(AssistanceRequestArray *list)
 
 static void update_final_cost_cli(AssistanceRequestArray *list)
 {
-    int code;
     float cost;
     AssistanceRequest *request;
+    int result;
 
-    code = read_int("Codice richiesta: ");
-    request = find_request_by_code(list, code);
+    request = read_existing_request(list);
 
     if (request == NULL) {
         show_error_message("Richiesta non trovata.");
@@ -467,8 +557,5 @@ static void update_final_cost_cli(AssistanceRequestArray *list)
     if (set_final_cost(request, cost) == 0)
         show_success_message("Costo finale aggiornato.");
     else
-        show_error_message(
-            "Aggiornamento costo finale fallito "
-            "(richiesta non chiusa o valore non valido)."
-        );
+        show_error_message("Aggiornamento costo finale fallito ""(richiesta non chiusa o valore non valido).");
 }   
