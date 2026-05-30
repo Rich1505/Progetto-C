@@ -285,7 +285,7 @@ static DeviceType read_device_type(void) //questa legge il tipo di dispositivo s
         case 3: return DEVICE_LAPTOP;
         case 4: return DEVICE_DESKTOP;
         case 5: return DEVICE_PRINTER;
-        default: show_error_message("Tipo dispositivo non valido.");
+        default: show_error_message("Tipo dispositivo non valido."); return DEVICE_ERROR;
     }
 }
 
@@ -304,7 +304,7 @@ static PriorityLevel read_priority_level(void) //questa legge il livello di prio
         case 1: return PRIORITY_LOW;
         case 2: return PRIORITY_MEDIUM;
         case 3: return PRIORITY_HIGH;
-        default: show_error_message("Priorita non valida.");
+        default: show_error_message("Priorita non valida."); return PRIORITY_ERROR;
     }
 }
 
@@ -323,7 +323,7 @@ static RequestStatus read_status(void) //questa legge lo stato della richiesta s
         case 1: return STATUS_OPEN;
         case 2: return STATUS_IN_PROGRESS;
         case 3: return STATUS_CLOSED;
-        default: show_error_message("Stato non valido.");
+        default: show_error_message("Stato non valido."); return STATUS_ERROR;
     }
 }
 

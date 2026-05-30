@@ -73,7 +73,7 @@ Date create_date(int day, int month, int year)
     return (Date){day, month, year};
 }
 
-AssistanceRequest *create_assistance_request(int request_code, char *customer_name, DeviceType device_type, char *description,
+AssistanceRequest *create_assistance_request(int request_code, const char *customer_name, DeviceType device_type, const char *description,
                                              PriorityLevel priority_level, RequestStatus request_status, float estimated_cost, float final_cost, Date opening_date)
 {
     if (request_code < 0)
@@ -174,7 +174,7 @@ int insert_assistance_request(AssistanceRequestArray *assistance_request_array, 
     return 0;
 }
 
-AssistanceRequest *copy_assistance_request(AssistanceRequest *src)
+AssistanceRequest *copy_assistance_request(const AssistanceRequest *src)
 {
     if (src == NULL)
     {
@@ -222,7 +222,7 @@ AssistanceRequestArray *create_assistance_request_array(AssistanceRequest **arra
     return assistance_request_array;
 }
 
-AssistanceRequestArray *copy_assistance_request_array(AssistanceRequestArray *src)
+AssistanceRequestArray *copy_assistance_request_array(const AssistanceRequestArray *src)
 {
     if(src == NULL)
     {
@@ -370,7 +370,7 @@ Date get_opening_date(const AssistanceRequest *request)
     return request->opening_date;
 }
 
-AssistanceRequest **get_assistance_request_array_ptr(AssistanceRequestArray *assistance_request_array)
+AssistanceRequest **get_assistance_request_array_ptr(const AssistanceRequestArray *assistance_request_array)
 {
     if(assistance_request_array == NULL)
     {
@@ -381,7 +381,7 @@ AssistanceRequest **get_assistance_request_array_ptr(AssistanceRequestArray *ass
     return assistance_request_array->array;
 }
 
-int get_assistance_request_array_size(const AssistanceRequestArray * const assistance_request_array)
+int get_assistance_request_array_size(const AssistanceRequestArray *assistance_request_array)
 {
     if(assistance_request_array == NULL)
     {
@@ -392,7 +392,7 @@ int get_assistance_request_array_size(const AssistanceRequestArray * const assis
     return assistance_request_array->size;
 }
 
-int get_assistance_request_array_capacity(AssistanceRequestArray *assistance_request_array)
+int get_assistance_request_array_capacity(const AssistanceRequestArray *assistance_request_array)
 {
     if(assistance_request_array == NULL)
     {

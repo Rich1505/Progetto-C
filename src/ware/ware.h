@@ -43,16 +43,16 @@ typedef enum
 
 Date create_date(int day, int month, int year);
 
-AssistanceRequest *create_assistance_request(int request_code, char *customer_name, DeviceType device_type, char *description,
+AssistanceRequest *create_assistance_request(int request_code, const char *customer_name, DeviceType device_type, const char *description,
                                              PriorityLevel priority_level, RequestStatus request_status, float estimated_cost, float final_cost, Date opening_date);
 
 AssistanceRequestArray *create_assistance_request_array(AssistanceRequest **array, int size, int capacity);
 
 int insert_assistance_request(AssistanceRequestArray *assistance_request_array, AssistanceRequest *assistance_request);
 
-AssistanceRequestArray *copy_assistance_request_array(AssistanceRequestArray *src);
+AssistanceRequestArray *copy_assistance_request_array(const AssistanceRequestArray *src);
 
-AssistanceRequest *copy_assistance_request(AssistanceRequest *src);
+AssistanceRequest *copy_assistance_request(const AssistanceRequest *src);
 
 void free_assistance_request(AssistanceRequest *request);
 
@@ -77,11 +77,11 @@ float get_final_cost(const AssistanceRequest *request);
 
 Date get_opening_date(const AssistanceRequest *request);
 
-AssistanceRequest **get_assistance_request_array_ptr(AssistanceRequestArray *assistance_request_array);
+AssistanceRequest **get_assistance_request_array_ptr(const AssistanceRequestArray *assistance_request_array);
 
-int get_assistance_request_array_size(const AssistanceRequestArray * const assistance_request_array);
+int get_assistance_request_array_size(const AssistanceRequestArray *assistance_request_array);
 
-int get_assistance_request_array_capacity(AssistanceRequestArray *assistance_request_array);
+int get_assistance_request_array_capacity(const AssistanceRequestArray *assistance_request_array);
 
 // SETTER
 int set_description(AssistanceRequest *request, const char *description);

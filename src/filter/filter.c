@@ -63,17 +63,17 @@ const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, Re
     return filtered_array_object;
 }
 
-AssistanceRequestArray *filter_by_priority(const AssistanceRequestArray *const arr, PriorityLevel priority)
+const AssistanceRequestArray *filter_by_priority(const AssistanceRequestArray *const arr, PriorityLevel priority)
 {
     return filter(arr, 0, priority, NULL, check_priority);
 }
 
-AssistanceRequestArray *filter_by_status(const AssistanceRequestArray *const arr, RequestStatus status)
+const AssistanceRequestArray *filter_by_status(const AssistanceRequestArray *const arr, RequestStatus status)
 {
     return filter(arr, status, 0, NULL, check_status);
 }
 
-AssistanceRequestArray *filter_by_customer_name(const AssistanceRequestArray *const arr, char *customer_name)
+const AssistanceRequestArray *filter_by_customer_name(const AssistanceRequestArray *const arr, char *customer_name)
 {
     return filter(arr, 0, 0, customer_name, check_customer_name);
 }

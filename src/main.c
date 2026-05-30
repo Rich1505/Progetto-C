@@ -11,11 +11,7 @@ int main(void)
 {
     AssistanceRequestArray *assistance_request_array = read_from_memory();
 
-    sort_by_estimated_cost(assistance_request_array);
-
-    filter_by_customer_name(assistance_request_array, "Mario Rossi");
-
-    write_in_memory(assistance_request_array);
+    run_main_menu(assistance_request_array);
 
     return 0;
 }
