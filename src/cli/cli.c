@@ -598,8 +598,6 @@ static void update_final_cost_cli(AssistanceRequestArray *list)
 
     if (set_final_cost(request, cost) == 0)
         show_success_message("Costo finale aggiornato.");
-    else
-        show_error_message("Aggiornamento costo finale fallito ""(richiesta non chiusa o valore non valido).");
 }
 
 static void update_description_cli(AssistanceRequestArray *list)
