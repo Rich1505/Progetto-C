@@ -31,10 +31,7 @@ struct assistance_request_array
  * @param year Anno da verificare.
  * @return 1 se l'anno è bisestile, 0 altrimenti.
  */
-static int is_leap_year(int year)
-{
-    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-}
+static int is_leap_year(int year);
 
 /**
  * @brief Valida la correttezza formale di una data sul calendario, considerando gli anni bisestili.
@@ -43,6 +40,19 @@ static int is_leap_year(int year)
  * @param year Anno.
  * @return true se la data esiste ed è valida, false in caso contrario con segnalazione su stderr.
  */
+static bool check_date(int day, int month, int year);
+
+static const char *device_to_string(DeviceType type);
+
+static const char *priority_to_string(PriorityLevel level);
+
+static const char *status_to_string(RequestStatus status);
+
+static int is_leap_year(int year)
+{
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+
 static bool check_date(int day, int month, int year)
 {
     if (year < 1900)

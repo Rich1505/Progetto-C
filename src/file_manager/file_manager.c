@@ -351,7 +351,7 @@ int write_in_memory(AssistanceRequestArray *assistance_request_array)
     return 0;
 }
 
-void free_array(AssistanceRequest **arr, int size)
+static void free_array(AssistanceRequest **arr, int size)
 {
     for (int i = 0; i < size; i++)
     {
@@ -360,7 +360,7 @@ void free_array(AssistanceRequest **arr, int size)
     free(arr);
 }
 
-void manage_error(AssistanceRequest **arr, int size, FILE *fp)
+static void manage_error(AssistanceRequest **arr, int size, FILE *fp)
 {
     free_array(arr, size);
     fclose(fp);

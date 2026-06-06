@@ -74,7 +74,7 @@ int compare_by_customer_name(AssistanceRequest *a, AssistanceRequest *b)
     return strcmp(get_customer_name(a), get_customer_name(b));
 }
 
-int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp)
+static int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp)
 {
     int i, j, k;
     int n1 = m - l + 1;
@@ -134,7 +134,7 @@ int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp)
     return 0;
 }
 
-int merge_sort(AssistanceRequest **arr, int l, int r, Comparator comp)
+static int merge_sort(AssistanceRequest **arr, int l, int r, Comparator comp)
 {
     if (l < r) {
         int m = l + (r - l) / 2;

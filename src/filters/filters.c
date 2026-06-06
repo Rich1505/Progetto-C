@@ -25,7 +25,7 @@ static int check_customer_name(AssistanceRequest *ass, RequestStatus status, Pri
 static const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, RequestStatus status, PriorityLevel priority, char *customer_name, Comparator comp);
 
 
-const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, RequestStatus status, PriorityLevel priority, char *customer_name, Comparator comp)
+static const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, RequestStatus status, PriorityLevel priority, char *customer_name, Comparator comp)
 {
     if (arr == NULL)
     {
@@ -103,17 +103,17 @@ const AssistanceRequestArray *filter_by_customer_name(const AssistanceRequestArr
     return filter(arr, 0, 0, customer_name, check_customer_name);
 }
 
-int check_status(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
+static int check_status(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
 {
     return get_request_status(ass) == status;
 }
 
-int check_priority(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
+static int check_priority(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
 {
     return get_priority_level(ass) == priority;
 }
 
-int check_customer_name(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
+static int check_customer_name(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
 {
     return strcmp(get_customer_name(ass), customer_name) == 0;
 }

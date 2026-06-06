@@ -119,7 +119,7 @@ void general_requests_report(const AssistanceRequestArray *list)
     free_assistance_request_array(sorted_array);
 }
 
-AssistanceRequestArray *empty_request_array()
+static AssistanceRequestArray *empty_request_array()
 {
     AssistanceRequest **arr = malloc(sizeof (AssistanceRequest *) * 2);
     if(arr == NULL)
@@ -139,7 +139,7 @@ AssistanceRequestArray *empty_request_array()
     return assistance_request_array;
 }
 
-void print_request_list(const AssistanceRequestArray *list)
+static void print_request_list(const AssistanceRequestArray *list)
 {
     if(list == NULL)
     {
