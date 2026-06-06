@@ -9,17 +9,7 @@
  * @param request_code Codice identificativo da cercare.
  * @return L'indice dell'elemento se trovato, altrimenti -1.
  */
-int linear_search(AssistanceRequest **arr, int size, int request_code) {
-    for(int i = 0;i < size; i++)
-    {
-        if(arr[i] != NULL && get_request_code(arr[i]) == request_code)
-        {
-            return i;
-        }
-    }
-
-    return -1;
-}
+static int linear_search(AssistanceRequest **arr, int size, int request_code);
 
 AssistanceRequest *search_by_request_code(AssistanceRequestArray *arr, int request_code)
 {
@@ -44,4 +34,16 @@ AssistanceRequest *search_by_request_code(AssistanceRequestArray *arr, int reque
     }
 
     return NULL;
+}
+
+int linear_search(AssistanceRequest **arr, int size, int request_code) {
+    for(int i = 0;i < size; i++)
+    {
+        if(arr[i] != NULL && get_request_code(arr[i]) == request_code)
+        {
+            return i;
+        }
+    }
+
+    return -1;
 }

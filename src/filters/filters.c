@@ -7,20 +7,11 @@
 /* Puntatore a funzione per uniformare i criteri di verifica delle singole richieste */
 typedef int (*Comparator)(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name);
 
-int check_status(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
-{
-    return get_request_status(ass) == status;
-}
+static int check_status(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name);
 
-int check_priority(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
-{
-    return get_priority_level(ass) == priority;
-}
+static check_priority(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name);
 
-int check_customer_name(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
-{
-    return strcmp(get_customer_name(ass), customer_name) == 0;
-}
+static check_customer_name(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name);
 
 /**
  * @brief Funzione interna generica per l'estrazione e il filtraggio dei record.
@@ -31,6 +22,9 @@ int check_customer_name(AssistanceRequest *ass, RequestStatus status, PriorityLe
  * @param comp Funzione di callback (predicato) per valutare la corrispondenza dell'elemento.
  * @return Un nuovo blocco array allocato con i soli elementi validi, o NULL in caso di errore.
  */
+static const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, RequestStatus status, PriorityLevel priority, char *customer_name, Comparator comp);
+
+
 const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, RequestStatus status, PriorityLevel priority, char *customer_name, Comparator comp)
 {
     if (arr == NULL)
@@ -107,4 +101,19 @@ const AssistanceRequestArray *filter_by_status(const AssistanceRequestArray *con
 const AssistanceRequestArray *filter_by_customer_name(const AssistanceRequestArray *const arr, char *customer_name)
 {
     return filter(arr, 0, 0, customer_name, check_customer_name);
+}
+
+int check_status(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
+{
+    return get_request_status(ass) == status;
+}
+
+int check_priority(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
+{
+    return get_priority_level(ass) == priority;
+}
+
+int check_customer_name(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
+{
+    return strcmp(get_customer_name(ass), customer_name) == 0;
 }

@@ -31,7 +31,7 @@ struct assistance_request_array
  * @param year Anno da verificare.
  * @return 1 se l'anno è bisestile, 0 altrimenti.
  */
-int is_leap_year(int year)
+static int is_leap_year(int year)
 {
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
 }
@@ -43,7 +43,7 @@ int is_leap_year(int year)
  * @param year Anno.
  * @return true se la data esiste ed è valida, false in caso contrario con segnalazione su stderr.
  */
-bool check_date(int day, int month, int year)
+static bool check_date(int day, int month, int year)
 {
     if (year < 1900)
     {

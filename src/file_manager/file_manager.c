@@ -9,14 +9,7 @@
  * @param arr Array di puntatori a richieste parzialmente allocato.
  * @param size Numero di elementi attualmente allocati nell'array.
  */
-void free_array(AssistanceRequest **arr, int size)
-{
-    for (int i = 0; i < size; i++)
-    {
-        free(arr[i]);
-    }
-    free(arr);
-}
+static void free_array(AssistanceRequest **arr, int size);
 
 /**
  * @brief Gestisce la chiusura del file e la pulizia della memoria a seguito di un errore di lettura.
@@ -24,11 +17,7 @@ void free_array(AssistanceRequest **arr, int size)
  * @param size Elementi inseriti fino al momento dell'errore.
  * @param fp Puntatore al file di testo aperto.
  */
-void manage_error(AssistanceRequest **arr, int size, FILE *fp)
-{
-    free_array(arr, size);
-    fclose(fp);
-}
+static void manage_error(AssistanceRequest **arr, int size, FILE *fp);
 
 AssistanceRequestArray *read_from_memory()
 {
@@ -358,4 +347,19 @@ int write_in_memory(AssistanceRequestArray *assistance_request_array)
     fclose(fp);
 
     return 0;
+}
+
+void free_array(AssistanceRequest **arr, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        free(arr[i]);
+    }
+    free(arr);
+}
+
+void manage_error(AssistanceRequest **arr, int size, FILE *fp)
+{
+    free_array(arr, size);
+    fclose(fp);
 }

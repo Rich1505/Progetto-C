@@ -6,6 +6,59 @@
 /* I nostri comparatori restituiranno un valore < 0 se il primo elemento viene prima del secondo, 0 se sono uguali e > 0 se il secondo elemento viene prima del primo */
 typedef int (*Comparator)(AssistanceRequest*, AssistanceRequest*);
 
+static int compare_by_estimated_cost(AssistanceRequest *a, AssistanceRequest *b);
+
+static int compare_by_customer_name(AssistanceRequest *a, AssistanceRequest *b);
+
+/**
+ * @brief Unisce due sotto-array ordinati in un unico blocco coeso e ordinato.
+ * @param arr Array di puntatori complessivo.
+ * @param l Indice sinistro del primo sotto-array.
+ * @param m Indice mediano che separa i due sotto-array.
+ * @param r Indice destro del secondo sotto-array.
+ * @param comp Puntatore alla funzione di comparazione da applicare.
+ * @return 0 in caso di successo, -1 se l'allocazione temporanea fallisce.
+ */
+static int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp);
+
+/**
+ * @brief Funzione ricorsiva interna che implementa l'algoritmo Merge Sort.
+ * @param arr Array di puntatori da ordinare.
+ * @param l Indice iniziale della porzione corrente.
+ * @param r Indice finale della porzione corrente.
+ * @param comp Puntatore alla funzione di comparazione.
+ * @return 0 in caso di successo, -1 se si verifica un errore a cascata nelle chiamate interne.
+ */
+int merge_sort(AssistanceRequest **arr, int l, int r, Comparator comp);
+
+void sort_by_estimated_cost(AssistanceRequestArray *arr)
+{
+    if(arr == NULL)
+    {
+        fprintf(stderr, "Errore sort_by_estimated_cost: puntatore NULL\n");
+        return;
+    }
+
+    int size = get_assistance_request_array_size(arr);
+    if (size <= 1) return;
+
+    merge_sort(get_assistance_request_array_ptr(arr), 0, get_assistance_request_array_size(arr) - 1, compare_by_estimated_cost);
+}
+
+void sort_by_customer_name(AssistanceRequestArray *arr)
+{
+    if(arr == NULL)
+    {
+        fprintf(stderr, "Errore sort_by_customer_name: puntatore NULL\n");
+        return;
+    }
+
+    int size = get_assistance_request_array_size(arr);
+    if (size <= 1) return;
+
+    merge_sort(get_assistance_request_array_ptr(arr), 0, get_assistance_request_array_size(arr) - 1, compare_by_customer_name);
+}
+
 int compare_by_estimated_cost(AssistanceRequest *a, AssistanceRequest *b)
 {
     float costo_a = get_estimated_cost(a);
@@ -21,15 +74,6 @@ int compare_by_customer_name(AssistanceRequest *a, AssistanceRequest *b)
     return strcmp(get_customer_name(a), get_customer_name(b));
 }
 
-/**
- * @brief Unisce due sotto-array ordinati in un unico blocco coeso e ordinato.
- * @param arr Array di puntatori complessivo.
- * @param l Indice sinistro del primo sotto-array.
- * @param m Indice mediano che separa i due sotto-array.
- * @param r Indice destro del secondo sotto-array.
- * @param comp Puntatore alla funzione di comparazione da applicare.
- * @return 0 in caso di successo, -1 se l'allocazione temporanea fallisce.
- */
 int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp)
 {
     int i, j, k;
@@ -90,14 +134,6 @@ int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp)
     return 0;
 }
 
-/**
- * @brief Funzione ricorsiva interna che implementa l'algoritmo Merge Sort.
- * @param arr Array di puntatori da ordinare.
- * @param l Indice iniziale della porzione corrente.
- * @param r Indice finale della porzione corrente.
- * @param comp Puntatore alla funzione di comparazione.
- * @return 0 in caso di successo, -1 se si verifica un errore a cascata nelle chiamate interne.
- */
 int merge_sort(AssistanceRequest **arr, int l, int r, Comparator comp)
 {
     if (l < r) {
@@ -114,32 +150,4 @@ int merge_sort(AssistanceRequest **arr, int l, int r, Comparator comp)
     }
 
     return 0;
-}
-
-void sort_by_estimated_cost(AssistanceRequestArray *arr)
-{
-    if(arr == NULL)
-    {
-        fprintf(stderr, "Errore sort_by_estimated_cost: puntatore NULL\n");
-        return;
-    }
-
-    int size = get_assistance_request_array_size(arr);
-    if (size <= 1) return;
-
-    merge_sort(get_assistance_request_array_ptr(arr), 0, get_assistance_request_array_size(arr) - 1, compare_by_estimated_cost);
-}
-
-void sort_by_customer_name(AssistanceRequestArray *arr)
-{
-    if(arr == NULL)
-    {
-        fprintf(stderr, "Errore sort_by_customer_name: puntatore NULL\n");
-        return;
-    }
-
-    int size = get_assistance_request_array_size(arr);
-    if (size <= 1) return;
-
-    merge_sort(get_assistance_request_array_ptr(arr), 0, get_assistance_request_array_size(arr) - 1, compare_by_customer_name);
 }
