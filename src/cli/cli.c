@@ -6,6 +6,7 @@
 #include "sort.h"
 #include "search.h"
 #include "filters.h"
+#include "reports.h"
 
 static void print_menu(void);
 static int read_int(const char *prompt);
@@ -16,10 +17,6 @@ static AssistanceRequest *read_existing_request(AssistanceRequestArray *list);
 
 static void show_error_message(const char *message);
 static void show_success_message(const char *message);
-
-static const char *device_to_string(DeviceType type);
-static const char *priority_to_string(PriorityLevel level);
-static const char *status_to_string(RequestStatus status);
 
 static DeviceType read_device_type(void);
 static PriorityLevel read_priority_level(void);
@@ -37,6 +34,8 @@ static void update_description_cli(AssistanceRequestArray *list);
 static void filter_by_status_cli(AssistanceRequestArray *list);
 static void filter_by_priority_cli(AssistanceRequestArray *list);
 static void filter_by_customer_name_cli(AssistanceRequestArray *list);
+static void general_report_cli(AssistanceRequestArray *list);
+static void operative_report_cli(AssistanceRequestArray *list);
 
 void run_main_menu(AssistanceRequestArray *list) 
 {
@@ -98,6 +97,12 @@ void run_main_menu(AssistanceRequestArray *list)
             case 13:
                 filter_by_customer_name_cli(list);
                 break;
+            case 14:
+                general_report_cli(list);
+                break;
+            case 15:
+                operative_report_cli(list);
+                break;
             case 0:
                 printf("Uscita in corso...\n");
                 break;
@@ -134,6 +139,8 @@ void print_menu(void)
     printf("11. Filtra per stato\n");
     printf("12. Filtra per priorita'\n");
     printf("13. Filtra per nome cliente\n");
+    printf("14. Report generale\n");
+    printf("15. Report operativo\n");
     printf("0. Esci\n");
     printf("\n=============================\n");
 }
@@ -201,39 +208,6 @@ static int has_digit(const char *string)
     }
 
     return 0;
-}
-
-static const char *device_to_string(DeviceType type) 
-{
-    switch (type) {
-        case DEVICE_SMARTPHONE: return "SMARTPHONE";
-        case DEVICE_TABLET:     return "TABLET";
-        case DEVICE_LAPTOP:     return "LAPTOP";
-        case DEVICE_DESKTOP:    return "DESKTOP";
-        case DEVICE_PRINTER:    return "PRINTER";
-        default:                return "ERRORE";
-    }
-}
-
-static const char *priority_to_string(PriorityLevel level) 
-{
-    switch (level) {
-        case PRIORITY_LOW:    return "LOW";
-        case PRIORITY_MEDIUM: return "MEDIUM";
-        case PRIORITY_HIGH:   return "HIGH";
-        default:              return "ERRORE";
-    }
-}
-
-static const char *status_to_string(RequestStatus status) 
-{
-    switch (status) {
-        case STATUS_OPEN:        return "OPEN";
-        case STATUS_IN_PROGRESS: return "IN_PROGRESS";
-        case STATUS_CLOSED:      return "CLOSED";
-        case STATUS_CANCELED:    return "CANCELED";
-        default:                 return "ERRORE";
-    }
 }
 
 static DeviceType read_device_type(void) 
@@ -650,4 +624,22 @@ static void filter_by_priority_cli(AssistanceRequestArray *list)
 static void filter_by_customer_name_cli(AssistanceRequestArray *list)
 {
     show_filtered(list, filter_name_provider, "Nessuna richiesta trovata per il cliente specificato.");
+}
+
+/**
+ * @brief Mostra il report generale: statistiche aggregate su tutte le richieste.
+ * @param list Elenco globale delle richieste.
+ */
+static void general_report_cli(AssistanceRequestArray *list)
+{
+    general_requests_report(list);
+}
+
+/**
+ * @brief Mostra il report operativo: richieste raggruppate per stato e dispositivo.
+ * @param list Elenco globale delle richieste.
+ */
+static void operative_report_cli(AssistanceRequestArray *list)
+{
+    operative_requests_report(list);
 }

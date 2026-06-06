@@ -9,9 +9,9 @@ typedef int (*Comparator)(AssistanceRequest *ass, RequestStatus status, Priority
 
 static int check_status(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name);
 
-static check_priority(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name);
+static int check_priority(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name);
 
-static check_customer_name(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name);
+static int check_customer_name(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name);
 
 /**
  * @brief Funzione interna generica per l'estrazione e il filtraggio dei record.

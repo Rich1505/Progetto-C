@@ -538,6 +538,39 @@ int set_final_cost(AssistanceRequest *request, float final_cost)
     return 0;
 }
 
+static const char *device_to_string(DeviceType type) 
+{
+    switch (type) {
+        case DEVICE_SMARTPHONE: return "SMARTPHONE";
+        case DEVICE_TABLET:     return "TABLET";
+        case DEVICE_LAPTOP:     return "LAPTOP";
+        case DEVICE_DESKTOP:    return "DESKTOP";
+        case DEVICE_PRINTER:    return "PRINTER";
+        default:                return "ERRORE";
+    }
+}
+
+static const char *priority_to_string(PriorityLevel level) 
+{
+    switch (level) {
+        case PRIORITY_LOW:    return "LOW";
+        case PRIORITY_MEDIUM: return "MEDIUM";
+        case PRIORITY_HIGH:   return "HIGH";
+        default:              return "ERRORE";
+    }
+}
+
+static const char *status_to_string(RequestStatus status) 
+{
+    switch (status) {
+        case STATUS_OPEN:        return "OPEN";
+        case STATUS_IN_PROGRESS: return "IN_PROGRESS";
+        case STATUS_CLOSED:      return "CLOSED";
+        case STATUS_CANCELED:    return "CANCELED";
+        default:                 return "ERRORE";
+    }
+}
+
 void print_request(const AssistanceRequest *request)
 {
     Date data;

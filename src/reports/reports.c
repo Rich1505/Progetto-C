@@ -1,6 +1,7 @@
 #include"reports.h"
 #include<stdio.h>
 #include"sort.h"
+#include<stdlib.h>
 
 void general_requests_report(const AssistanceRequestArray *list)
 {
@@ -85,7 +86,7 @@ void general_requests_report(const AssistanceRequestArray *list)
     printf("    - In Corso (IN PROGRESS): %d\n", in_progress_status_requests_number);
     printf("    - Chiuse (CLOSED):        %d\n\n", closed_status_requests_number);
 
-    printf("iii. Richieste per PRIORITÀ:\n");
+    printf("iii. Richieste per PRIORITA':\n");
     printf("     - Alta (HIGH):   %d\n", high_priority_requests_number);
     printf("     - Media (MEDIUM): %d\n", medium_priority_requests_number);
     printf("     - Bassa (LOW):    %d\n\n", low_priority_requests_number);
@@ -248,20 +249,32 @@ void operative_requests_report(const AssistanceRequestArray *list)
     printf("            REPORT OPERATIVO RICHIESTE            \n");
     printf("==================================================\n");
 
-    printf("i. Richieste ad ALTA PRIORITÀ ancora APERTE:\n");
-    print_request_list(high_priority_open_requests);
+    printf("i. Richieste ad ALTA PRIORITA' ancora APERTE:\n");
+    if(get_assistance_request_array_size(high_priority_open_requests) == 0)
+        printf("Nessuna richiesta\n");
+    else
+        print_request_list(high_priority_open_requests);
     printf("\n");
 
     printf("ii. Richieste IN LAVORAZIONE (IN PROGRESS):\n");
-    print_request_list(in_progress_requests);
+    if(get_assistance_request_array_size(in_progress_requests) == 0)
+        printf("Nessuna richiesta\n");
+    else
+        print_request_list(in_progress_requests);
     printf("\n");
 
     printf("iii. Richieste COMPLETATE (CLOSED):\n");
-    print_request_list(closed_requests);
+    if(get_assistance_request_array_size(closed_requests) == 0)
+        printf("Nessuna richiesta\n");
+    else
+        print_request_list(closed_requests);
     printf("\n");
 
     printf("iv. Richieste ANNULLATE (CANCELED):\n");
-    print_request_list(cancelled_requests);
+    if(get_assistance_request_array_size(cancelled_requests) == 0)
+        printf("Nessuna richiesta\n");
+    else
+        print_request_list(cancelled_requests);
     printf("\n");
 
     printf("v. Riepilogo per TIPOLOGIA DI DISPOSITIVO:\n");

@@ -11,3 +11,5 @@ target_link_libraries(cli PUBLIC filters)
 target_link_libraries(cli PUBLIC search)
 
 target_link_libraries(cli PUBLIC ware)
+
+target_link_libraries(cli PUBLIC reports)
