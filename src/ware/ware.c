@@ -278,6 +278,21 @@ void free_assistance_request_array(AssistanceRequestArray *arr)
     free(arr);
 }
 
+void free_assistance_request_array_shallow(AssistanceRequestArray *arr)
+{
+    if (arr == NULL)
+    {
+        return;
+    }
+
+    if (arr->array != NULL)
+    {
+        free(arr->array);
+    }
+
+    free(arr);
+}
+
 // GETTER
 
 int get_request_code(const AssistanceRequest *request)

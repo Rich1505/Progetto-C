@@ -58,6 +58,8 @@ void free_assistance_request(AssistanceRequest *request);
 
 void free_assistance_request_array(AssistanceRequestArray *arr);
 
+void free_assistance_request_array_shallow(AssistanceRequestArray *arr);
+
 // GETTER
 int get_request_code(const AssistanceRequest *request);
 

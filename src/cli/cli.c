@@ -11,7 +11,6 @@ static void print_menu(void);
 static int read_int(const char *prompt);
 static float read_float(const char *prompt);
 static void read_string(const char *prompt, char *buffer, int size);
-static void read_name(const char *prompt,char *buffer,int size);
 static int has_digit(const char *string);
 static AssistanceRequest *read_existing_request(AssistanceRequestArray *list);
 
@@ -214,21 +213,6 @@ static int has_digit(const char *string)
 
     return 0;
 }
-
-static void read_name(const char *prompt, char *buffer, int size)
-{
-    while (1) {
-        read_string(prompt, buffer, size);
-
-        if (!has_digit(buffer)) {
-            return;
-        }
-
-        show_error_message("Il nome non puo' contenere numeri.");
-    }
-}
-//il buffer serve a pulire eventuali caratteri residui dopo la lettura di un numero, evitando che interferiscano con le letture successive di stringhe.
-
 
 //questo è per convertire i tipi enum in stringhe leggibili, utile per la visualizzazione delle richieste.
 
