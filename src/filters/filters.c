@@ -1,4 +1,4 @@
-#include "filter.h"
+#include "filters.h"
 #include "ware.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -52,8 +52,14 @@ const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, Re
     AssistanceRequest **temp = realloc(filtered_array, filtered_array_size * sizeof(AssistanceRequest *));
     if (temp == NULL)
     {
-        fprintf(stderr, "Errore filter: riallocazione fallita\n");
-        free(filtered_array);
+        if(size != 0)
+        {
+            fprintf(stderr, "Errore filter: riallocazione fallita\n");
+            free(filtered_array);
+        }
+        else
+            fprintf(stderr, "Nessuna richiesta e' stata trovata\n");
+
         return NULL;
     }
     filtered_array = temp;

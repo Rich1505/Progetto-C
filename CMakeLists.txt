@@ -10,7 +10,7 @@ add_subdirectory(src/cli)
 add_subdirectory(src/file_manager)
 add_subdirectory(src/sort)
 add_subdirectory(src/search)
-add_subdirectory(src/filter)
+add_subdirectory(src/filters)
 
 add_executable(GestioneRichieste
     src/main.c
@@ -21,6 +21,6 @@ target_link_libraries(GestioneRichieste PRIVATE
     cli
     file_manager
     sort
-    filter
+    filters
     search
 )

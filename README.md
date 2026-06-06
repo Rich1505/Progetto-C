@@ -19,7 +19,7 @@ Il codice è organizzato in modo modulare:
 *   `src/cli/`: Gestione dell'interfaccia utente a riga di comando.
 *   `src/file_manager/`: Logica di lettura/scrittura su file.
 *   `src/sort/`: Algoritmi di ordinamento (Merge Sort).
-*   `src/search/` e `src/filter/`: Funzioni di ricerca e filtraggio.
+*   `src/search/` e `src/filters/`: Funzioni di ricerca e filtraggio.
 
 ## Prerequisiti
 

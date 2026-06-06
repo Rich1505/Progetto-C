@@ -5,7 +5,7 @@
 #include "file_manager.h"
 #include "sort.h"
 #include "search.h"
-#include "filter.h"
+#include "filters.h"
 
 static void print_menu(void);
 static int read_int(const char *prompt);
@@ -35,6 +35,9 @@ static void update_estimated_cost_cli(AssistanceRequestArray *list);
 static void update_final_cost_cli(AssistanceRequestArray *list);
 static void search_request_cli(AssistanceRequestArray *list);
 static void update_description_cli(AssistanceRequestArray *list);
+static void filter_by_status_cli(AssistanceRequestArray *list);
+static void filter_by_priority_cli(AssistanceRequestArray *list);
+static void filter_by_customer_name_cli(AssistanceRequestArray *list);
 
 void run_main_menu(AssistanceRequestArray *list) //questa funzione gestisce il menu principale, mostrando le opzioni e chiamando le funzioni corrispondenti in base alla scelta dell'utente.
 {
@@ -86,6 +89,15 @@ void run_main_menu(AssistanceRequestArray *list) //questa funzione gestisce il m
                 show_success_message("Salvataggio completato.");
                 else
                 show_error_message("Errore durante il salvataggio.");
+                break;
+            case 11:
+                filter_by_status_cli(list);
+                break;
+            case 12:
+                filter_by_priority_cli(list);
+                break;
+            case 13:
+                filter_by_customer_name_cli(list);
                 break;
             case 0:
                 printf("Uscita in corso...\n");
@@ -143,6 +155,9 @@ void print_menu(void)
     printf("8. Ordina per nome cliente\n");
     printf("9. Ordina per costo stimato\n");
     printf("10. Salva su file\n");
+    printf("11. Filtra per stato\n");
+    printf("12. Filtra per priorita'\n");
+    printf("13. Filtra per nome cliente\n");
     printf("0. Esci\n");
     printf("\n=============================\n");
 }
@@ -597,4 +612,76 @@ static void update_description_cli(AssistanceRequestArray *list)
         show_success_message("Descrizione aggiornata.");
     else
         show_error_message("Aggiornamento descrizione fallito.");
+}
+
+//FilterProvider è un function pointer che riceve la lista e restituisce un array filtrato.
+//Permette a show_filtered di gestire la logica comune (controllo NULL, stampa, free)
+//senza duplicarla nelle tre funzioni specifiche
+
+typedef const AssistanceRequestArray *(*FilterProvider)(AssistanceRequestArray *list);
+
+static void show_filtered(AssistanceRequestArray *list, FilterProvider provider, const char *empty_message)
+{
+    const AssistanceRequestArray *filtered;
+    AssistanceRequest **array;
+    int size;
+
+    filtered = provider(list);
+
+    if (filtered == NULL)
+    {
+        return;
+    }
+
+    array = get_assistance_request_array_ptr(filtered);
+    size = get_assistance_request_array_size(filtered);
+
+    if (size <= 0)
+    {
+        printf("%s\n", empty_message);
+    }
+    else
+    {
+        for (int i = 0; i < size; i++)
+        {
+            show_request_message(array[i]);
+        }
+    }
+
+    free_assistance_request_array_shallow((AssistanceRequestArray *)filtered);
+}
+
+//queste tre funzioni leggono l'input specifico, chiamano il filtro corrispondente
+//e delegano tutta la logica comune a show_filtered.
+
+static const AssistanceRequestArray *filter_status_provider(AssistanceRequestArray *list)
+{
+    return filter_by_status(list, read_status());
+}
+
+static const AssistanceRequestArray *filter_priority_provider(AssistanceRequestArray *list)
+{
+    return filter_by_priority(list, read_priority_level());
+}
+
+static const AssistanceRequestArray *filter_name_provider(AssistanceRequestArray *list)
+{
+    char customer_name[MAX_CUSTOMER_NAME];
+    read_string("Nome cliente: ", customer_name, MAX_CUSTOMER_NAME);
+    return filter_by_customer_name(list, customer_name);
+}
+
+static void filter_by_status_cli(AssistanceRequestArray *list)
+{
+    show_filtered(list, filter_status_provider, "Nessuna richiesta trovata con lo stato selezionato.");
+}
+
+static void filter_by_priority_cli(AssistanceRequestArray *list)
+{
+    show_filtered(list, filter_priority_provider, "Nessuna richiesta trovata con la priorita' selezionata.");
+}
+
+static void filter_by_customer_name_cli(AssistanceRequestArray *list)
+{
+    show_filtered(list, filter_name_provider, "Nessuna richiesta trovata per il cliente specificato.");
 }

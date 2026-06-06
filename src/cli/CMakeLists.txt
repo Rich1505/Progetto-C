@@ -6,7 +6,7 @@ target_link_libraries(cli PUBLIC file_manager)
 
 target_link_libraries(cli PUBLIC sort)
 
-target_link_libraries(cli PUBLIC filter)
+target_link_libraries(cli PUBLIC filters)
 
 target_link_libraries(cli PUBLIC search)
 

@@ -5,7 +5,7 @@
 #include<stdio.h>
 #include"search.h"
 #include"cli.h"
-#include"filter.h"
+#include"filters.h"
 
 int main(void)
 {
