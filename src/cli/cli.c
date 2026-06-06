@@ -393,7 +393,7 @@ static AssistanceRequest *read_existing_request(AssistanceRequestArray *list) //
             return NULL;
         }
 
-        request = find_request_by_code(list, code);
+        request = search_by_request_code(list, code);
 
         if (request != NULL) {
             return request;
@@ -443,6 +443,9 @@ static void insert_request_cli(AssistanceRequestArray *list)
         {
             show_error_message("Il codice deve essere un numero intero positivo.");
         }
+
+        AssistanceRequest *request_by_code = search_by_request_code(list, code);
+
     } while (code < 0);
     read_string("Nome cliente: ", customer_name, MAX_CUSTOMER_NAME);
 
