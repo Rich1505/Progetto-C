@@ -25,6 +25,7 @@ void general_requests_report(const AssistanceRequestArray *list)
     float estimated_cost_sum = 0.0f;
     float final_cost_sum = 0.0f;
 
+    /* Singolo ciclo di scansione lineare per accumulare contatori e statistiche finanziarie */
     for(int i = 0;i < size;i++)
     {
         switch(get_request_status(arr[i]))
