@@ -1,3 +1,12 @@
+/**
+ * @file stats.h
+ * @brief Interfaccia del modulo per il calcolo delle statistiche aggregate.
+ *
+ * Questo modulo si occupa dell'analisi quantitativa e finanziaria dei dati
+ * memorizzati nel sistema. Fornisce report di sintesi focalizzati sul calcolo
+ * di metriche quali il volume di richieste, i costi medi e i picchi di spesa,
+ * aggregati per categorie specifiche.
+ */
 #ifndef STATS_H
 #define STATS_H
 #include"ware.h"
