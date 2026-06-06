@@ -56,3 +56,8 @@ dkms.conf
 
 #CMAKE
 build/
+
+#Doxygen
+Doxyfile
+html/
+latex/
