@@ -12,6 +12,7 @@ add_subdirectory(src/sort)
 add_subdirectory(src/search)
 add_subdirectory(src/filters)
 add_subdirectory(src/reports)
+add_subdirectory(src/stats)
 
 add_executable(GestioneRichieste
     src/main.c
@@ -25,4 +26,5 @@ target_link_libraries(GestioneRichieste PRIVATE
     sort
     filters
     search
+    stats
 )

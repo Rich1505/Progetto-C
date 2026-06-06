@@ -7,6 +7,7 @@
 #include "search.h"
 #include "filters.h"
 #include "reports.h"
+#include"stats.h"
 
 /* =========================================================
  *  FORWARD DECLARATIONS — utility di input/output
@@ -35,6 +36,7 @@ static void run_request_management_menu(AssistanceRequestArray *list);
 static void run_search_filter_menu(AssistanceRequestArray *list);
 static void run_sort_menu(AssistanceRequestArray *list);
 static void run_report_menu(AssistanceRequestArray *list);
+static void run_stats_menu(AssistanceRequestArray *list);
 static void run_save_menu(AssistanceRequestArray *list);
 
 /* =========================================================
@@ -77,6 +79,12 @@ static const AssistanceRequestArray *filter_status_provider(AssistanceRequestArr
 static const AssistanceRequestArray *filter_priority_provider(AssistanceRequestArray *list);
 static const AssistanceRequestArray *filter_name_provider(AssistanceRequestArray *list);
 
+/* =========================================================
+ *  FORWARD DECLARATIONS — statistiche
+ * ========================================================= */
+static void device_stats_cli(AssistanceRequestArray *list);
+static void priority_stats_cli(AssistanceRequestArray *list);
+
 
 /* =========================================================
  *  ENTRY POINT — menu principale
@@ -110,7 +118,8 @@ void run_main_menu(AssistanceRequestArray *list)
             case 2: run_search_filter_menu(list);      break;
             case 3: run_sort_menu(list);               break;
             case 4: run_report_menu(list);             break;
-            case 5: run_save_menu(list);               break;
+            case 5: run_stats_menu(list);              break;
+            case 6: run_save_menu(list);               break;
             case 0: printf("\nArrivederci!\n");        break;
             default:
                 show_error_message("Opzione non valida. Inserisci un numero valido del menu.");
@@ -153,7 +162,8 @@ static void print_main_menu(void)
     printf("|  2. Ricerca e Filtri             |\n");
     printf("|  3. Ordinamenti                  |\n");
     printf("|  4. Report                       |\n");
-    printf("|  5. Salvataggio                  |\n");
+    printf("|  5. Statistiche                  |\n");
+    printf("|  6. Salvataggio                  |\n");
     printf("|  0. Esci                         |\n");
     printf("+----------------------------------+\n");
 }
@@ -312,6 +322,42 @@ static void run_report_menu(AssistanceRequestArray *list)
         {
             case 1: general_report_cli(list);   break;
             case 2: operative_report_cli(list); break;
+            case 0: break;
+            default: show_error_message("Opzione non valida.");
+        }
+    } while (choice != 0);
+}
+
+
+/* =========================================================
+ * SOTTOMENU — AREA STATISTICHE
+ * ========================================================= */
+
+/**
+ * @brief Gestisce il sottomenu dell'area "Statistiche".
+ * Permette di visualizzare dati aggregati per dispositivo e priorità.
+ * @param list Elenco globale delle richieste.
+ */
+static void run_stats_menu(AssistanceRequestArray *list)
+{
+    int choice;
+
+    do
+    {
+        printf("\n+----------------------------------+\n");
+        printf("|           STATISTICHE            |\n");
+        printf("+----------------------------------+\n");
+        printf("|  1. Statistiche per dispositivo  |\n");
+        printf("|  2. Statistiche per priorita'    |\n");
+        printf("|  0. Torna al menu principale     |\n");
+        printf("+----------------------------------+\n");
+
+        choice = read_int("Seleziona un'opzione: ");
+
+        switch (choice)
+        {
+            case 1: device_stats_cli(list);     break;
+            case 2: priority_stats_cli(list);    break;
             case 0: break;
             default: show_error_message("Opzione non valida.");
         }
@@ -1047,4 +1093,20 @@ static void general_report_cli(AssistanceRequestArray *list)
 static void operative_report_cli(AssistanceRequestArray *list)
 {
     operative_requests_report(list);
+}
+
+/**
+ * @brief Mostra le statistiche aggregate per tipo di dispositivo.
+ */
+static void device_stats_cli(AssistanceRequestArray *list)
+{
+    print_stats_by_device_type(list);
+}
+
+/**
+ * @brief Mostra le statistiche aggregate per livello di priorità.
+ */
+static void priority_stats_cli(AssistanceRequestArray *list)
+{
+    print_stats_by_priority(list);
 }
