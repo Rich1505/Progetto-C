@@ -12,11 +12,11 @@ add_subdirectory(src/sort)
 add_subdirectory(src/search)
 add_subdirectory(src/filter)
 
-add_executable(server
+add_executable(GestioneRichieste
     src/main.c
 )
 
-target_link_libraries(server PRIVATE 
+target_link_libraries(GestioneRichieste PRIVATE 
     ware
     cli
     file_manager

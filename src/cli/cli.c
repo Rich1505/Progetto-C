@@ -2,7 +2,6 @@
 #include <string.h>
 #include <ctype.h>
 #include "cli.h"
-#include "ware.h"
 #include "file_manager.h"
 #include "sort.h"
 #include "search.h"
@@ -15,6 +14,10 @@ static void read_string(const char *prompt, char *buffer, int size);
 static void read_name(const char *prompt,char *buffer,int size);
 static int has_digit(const char *string);
 static AssistanceRequest *read_existing_request(AssistanceRequestArray *list);
+
+void show_error_message(const char *message);
+void show_success_message(const char *message);
+void show_request_message(const AssistanceRequest *request);
 
 static const char *device_to_string(DeviceType type);
 static const char *priority_to_string(PriorityLevel level);
@@ -33,21 +36,6 @@ static void update_estimated_cost_cli(AssistanceRequestArray *list);
 static void update_final_cost_cli(AssistanceRequestArray *list);
 static void search_request_cli(AssistanceRequestArray *list);
 static void update_description_cli(AssistanceRequestArray *list);
-
-//tutte le funzioni del menu 
-void show_startup_screen(void)
- {
-     printf("===========================================================\n");
-     printf("      CENTRO ASSISTENZA TECNICA - GESTIONE RICHIESTE       \n");
-     printf("===========================================================\n");
-     printf("Benvenuto nel sistema di gestione delle richieste di assistenza tecnica!\n");
-     printf("Le funzionalità principali includono:\n");
-     printf("1. Gestione delle richieste: Inserimento, Modifica, Cancellazione, Visualizzazione\n");
-     printf("2. Ricerca e Filtro: Ricerca per codice, nome cliente, tipo di dispositivo, priorità, stato\n");
-     printf("3. Ordinamento: Ordinamento per codice, nome cliente, tipo di dispositivo, priorità, stato\n");
-     printf("4. Statistiche: Numero totale di richieste, richieste per tipo di dispositivo, richieste per priorità, richieste per stato\n");
-     printf("5. Report: Generazione di report dettagliati in formato testo\n");
- }
 
 void run_main_menu(AssistanceRequestArray *list) //questa funzione gestisce il menu principale, mostrando le opzioni e chiamando le funzioni corrispondenti in base alla scelta dell'utente.
 {
@@ -445,7 +433,11 @@ static void insert_request_cli(AssistanceRequestArray *list)
         }
 
         AssistanceRequest *request_by_code = search_by_request_code(list, code);
-
+        if(request_by_code != NULL)
+        {
+            show_error_message("Il codice inserito e' gia' utilizzato da un'altra richiesta");
+            code = -1;
+        }
     } while (code < 0);
     read_string("Nome cliente: ", customer_name, MAX_CUSTOMER_NAME);
 
@@ -588,7 +580,6 @@ static void update_final_cost_cli(AssistanceRequestArray *list)
 {
     float cost;
     AssistanceRequest *request;
-    int result;
 
     request = read_existing_request(list);
 
