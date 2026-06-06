@@ -20,6 +20,8 @@ Il codice è organizzato in modo modulare:
 *   `src/file_manager/`: Logica di lettura/scrittura su file.
 *   `src/sort/`: Algoritmi di ordinamento (Merge Sort).
 *   `src/search/` e `src/filters/`: Funzioni di ricerca e filtraggio.
+*   `src/stats/`: Statistiche per priorità e tipologia dispostivo.
+*   `src/reports/`: Report dettagliati sulle richieste.
 
 ## Prerequisiti
 
@@ -53,11 +55,8 @@ cmake --build .
 Una volta compilato, puoi avviare il programma con:
 
 ```bash
-./gestione_assistenza
+./GestioneRichieste
 ```
 
 ## Note sul File di Memoria
 Al primo avvio, se il file `requests.txt` non esiste, il programma lo creerà automaticamente. I dati vengono salvati nel file ogni volta che viene selezionata l'opzione "Salva su file" dal menu principale.
-
----
-*Sviluppato come progetto di gestione magazzino e assistenza in C.*
