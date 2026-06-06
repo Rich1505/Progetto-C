@@ -47,7 +47,8 @@ typedef enum
     STATUS_ERROR = -1,
     STATUS_OPEN = 0,
     STATUS_IN_PROGRESS,
-    STATUS_CLOSED
+    STATUS_CLOSED,
+    STATUS_CANCELED
 } RequestStatus;
 
 /**
@@ -124,6 +125,14 @@ void free_assistance_request_array(AssistanceRequestArray *arr);
  */
 void free_assistance_request_array_shallow(AssistanceRequestArray *arr);
 
+/**
+ * @brief Stampa a terminale i dettagli completi di una singola richiesta di assistenza.
+ * * Formatta in modo strutturato e leggibile tutti i campi informativi dell'entità 
+ * passata come argomento (codice, cliente, dispositivo, descrizione, priorità, stato, costi e data).
+ * * @param request Puntatore costante all'istanza della richiesta da stampare.
+ */
+void print_request(const AssistanceRequest *request);
+
 // GETTER
 int get_request_code(const AssistanceRequest *request);
 
@@ -157,6 +166,8 @@ int set_request_status_opened(AssistanceRequest *request);
 int set_request_status_in_progress(AssistanceRequest *request);
 
 int set_request_status_closed(AssistanceRequest *request);
+
+int set_request_status_canceled(AssistanceRequest *request);
 
 int set_estimated_cost(AssistanceRequest *request, float estimated_cost);
 

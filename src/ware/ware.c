@@ -486,6 +486,18 @@ int set_request_status_closed(AssistanceRequest *request)
     return 0;
 }
 
+int set_request_status_canceled(AssistanceRequest *request)
+{
+    if(request == NULL)
+    {
+        fprintf(stderr, "Errore set_request_status: puntatore richiesta NULL\n");
+        return -1;
+    }
+
+    request->request_status = STATUS_CANCELED;
+    return 0;
+}
+
 int set_estimated_cost(AssistanceRequest *request, float estimated_cost)
 {
     if (request == NULL)
@@ -524,4 +536,28 @@ int set_final_cost(AssistanceRequest *request, float final_cost)
 
     request->final_cost = final_cost;
     return 0;
+}
+
+void print_request(const AssistanceRequest *request)
+{
+    Date data;
+
+    if (request == NULL) {
+        fprintf(stderr, "Errore print_request: puntatore richiesta NULL\n");
+        return;
+    }
+
+    data = get_opening_date(request);
+
+    printf("--------------------------------------------\n");
+    printf("Codice: %d\n", get_request_code(request));
+    printf("Cliente: %s\n", get_customer_name(request));
+    printf("Dispositivo: %s\n", device_to_string(get_device_type(request)));
+    printf("Descrizione: %s\n", get_description(request));
+    printf("Priorita: %s\n", priority_to_string(get_priority_level(request)));
+    printf("Stato: %s\n", status_to_string(get_request_status(request)));
+    printf("Costo stimato: %.2f\n", get_estimated_cost(request));
+    printf("Costo finale: %.2f\n", get_final_cost(request));
+    printf("Data apertura: %02d/%02d/%04d\n",data.day, data.month, data.year);
+    printf("--------------------------------------------\n");
 }

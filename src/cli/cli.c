@@ -16,7 +16,6 @@ static AssistanceRequest *read_existing_request(AssistanceRequestArray *list);
 
 static void show_error_message(const char *message);
 static void show_success_message(const char *message);
-static void show_request_message(const AssistanceRequest *request);
 
 static const char *device_to_string(DeviceType type);
 static const char *priority_to_string(PriorityLevel level);
@@ -117,30 +116,6 @@ void show_error_message(const char *message)
 void show_success_message(const char *message)
 {
     printf("[OK] %s\n", message);
-}
-
-void show_request_message(const AssistanceRequest *request)
-{
-    Date data;
-
-    if (request == NULL) {
-        show_error_message("Richiesta non valida.");
-        return;
-    }
-
-    data = get_opening_date(request);
-
-    printf("--------------------------------------------\n");
-    printf("Codice: %d\n", get_request_code(request));
-    printf("Cliente: %s\n", get_customer_name(request));
-    printf("Dispositivo: %s\n", device_to_string(get_device_type(request)));
-    printf("Descrizione: %s\n", get_description(request));
-    printf("Priorita: %s\n", priority_to_string(get_priority_level(request)));
-    printf("Stato: %s\n", status_to_string(get_request_status(request)));
-    printf("Costo stimato: %.2f\n", get_estimated_cost(request));
-    printf("Costo finale: %.2f\n", get_final_cost(request));
-    printf("Data apertura: %02d/%02d/%04d\n",data.day, data.month, data.year);
-    printf("--------------------------------------------\n");
 }
 
 void print_menu(void)
@@ -256,6 +231,7 @@ static const char *status_to_string(RequestStatus status)
         case STATUS_OPEN:        return "OPEN";
         case STATUS_IN_PROGRESS: return "IN_PROGRESS";
         case STATUS_CLOSED:      return "CLOSED";
+        case STATUS_CANCELED:    return "CANCELED";
         default:                 return "ERRORE";
     }
 }
@@ -319,6 +295,7 @@ static RequestStatus read_status(void)
         printf("1. Open\n");
         printf("2. In progress\n");
         printf("3. Closed\n");
+        printf("4. Canceled\n");
 
         choice = read_int("Scelta: ");
 
@@ -327,6 +304,7 @@ static RequestStatus read_status(void)
         case 1: return STATUS_OPEN;
         case 2: return STATUS_IN_PROGRESS;
         case 3: return STATUS_CLOSED;
+        case 4: return STATUS_CANCELED;
         default: show_error_message("Stato non valido. Reinserisci la scelta.");
         }
     }
@@ -391,7 +369,7 @@ static void show_all_requests(AssistanceRequestArray *list)
     }
 
     for (int i = 0; i < size; i++) {
-        show_request_message(array[i]);
+        print_request(array[i]);
     }
 }
 
@@ -492,7 +470,7 @@ static void search_request_cli(AssistanceRequestArray *list)
         return;
     }
 
-    show_request_message(request);
+    print_request(request);
 }
 
 static void update_status_cli(AssistanceRequestArray *list)
@@ -522,15 +500,17 @@ static void update_status_cli(AssistanceRequestArray *list)
     case STATUS_CLOSED:
         result = set_request_status_closed(request);
         break;
+    case STATUS_CANCELED:
+        result = set_request_status_canceled(request);
+        break;
     default:
         result = -1;
-
     }
 
     if (result == 0)
-            show_success_message("Stato aggiornato.");
-        else
-            show_error_message("Aggiornamento stato fallito.");
+        show_success_message("Stato aggiornato.");
+    else
+        show_error_message("Aggiornamento stato fallito.");
 }
 
 static void update_estimated_cost_cli(AssistanceRequestArray *list)
@@ -632,7 +612,7 @@ static void show_filtered(AssistanceRequestArray *list, FilterProvider provider,
     {
         for (int i = 0; i < size; i++)
         {
-            show_request_message(array[i]);
+            print_request(array[i]);
         }
     }
 
