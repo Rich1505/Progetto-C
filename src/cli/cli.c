@@ -8,187 +8,448 @@
 #include "filters.h"
 #include "reports.h"
 
-static void print_menu(void);
-static int read_int(const char *prompt);
+/* =========================================================
+ *  FORWARD DECLARATIONS — utility di input/output
+ * ========================================================= */
+static int   read_int(const char *prompt);
 static float read_float(const char *prompt);
-static void read_string(const char *prompt, char *buffer, int size);
-static int has_digit(const char *string);
-static AssistanceRequest *read_existing_request(AssistanceRequestArray *list);
+static void  read_string(const char *prompt, char *buffer, int size);
+static int   has_digit(const char *string);
 
 static void show_error_message(const char *message);
 static void show_success_message(const char *message);
+static void print_splash_screen(void);
 
-static DeviceType read_device_type(void);
+static DeviceType    read_device_type(void);
 static PriorityLevel read_priority_level(void);
 static RequestStatus read_status(void);
 
+static AssistanceRequest *read_existing_request(AssistanceRequestArray *list);
 static AssistanceRequest *find_request_by_code(AssistanceRequestArray *list, int code);
 
+/* =========================================================
+ *  FORWARD DECLARATIONS — menu principali e sottomenù
+ * ========================================================= */
+static void print_main_menu(void);
+static void run_request_management_menu(AssistanceRequestArray *list);
+static void run_search_filter_menu(AssistanceRequestArray *list);
+static void run_sort_menu(AssistanceRequestArray *list);
+static void run_report_menu(AssistanceRequestArray *list);
+static void run_save_menu(AssistanceRequestArray *list);
+
+/* =========================================================
+ *  FORWARD DECLARATIONS — operazioni di gestione richieste
+ * ========================================================= */
 static void show_all_requests(AssistanceRequestArray *list);
 static void insert_request_cli(AssistanceRequestArray *list);
-static void update_status_cli(AssistanceRequestArray *list);
-static void update_estimated_cost_cli(AssistanceRequestArray *list);
-static void update_final_cost_cli(AssistanceRequestArray *list);
+static void update_request_cli(AssistanceRequestArray *list);
+static void cancel_request_cli(AssistanceRequestArray *list);
+static void view_request_detail_cli(AssistanceRequestArray *list);
+
+/* =========================================================
+ *  FORWARD DECLARATIONS — operazioni di ricerca e filtri
+ * ========================================================= */
 static void search_request_cli(AssistanceRequestArray *list);
-static void update_description_cli(AssistanceRequestArray *list);
 static void filter_by_status_cli(AssistanceRequestArray *list);
 static void filter_by_priority_cli(AssistanceRequestArray *list);
 static void filter_by_customer_name_cli(AssistanceRequestArray *list);
+
+/* =========================================================
+ *  FORWARD DECLARATIONS — operazioni di report
+ * ========================================================= */
 static void general_report_cli(AssistanceRequestArray *list);
 static void operative_report_cli(AssistanceRequestArray *list);
 
-void run_main_menu(AssistanceRequestArray *list) 
+/* =========================================================
+ *  FORWARD DECLARATIONS — operazioni di modifica su puntatore diretto
+ * ========================================================= */
+static void update_status_cli_on(AssistanceRequest *request);
+static void update_estimated_cost_cli_on(AssistanceRequest *request);
+static void update_final_cost_cli_on(AssistanceRequest *request);
+static void update_description_cli_on(AssistanceRequest *request);
+
+/* =========================================================
+ *  FORWARD DECLARATIONS — filtri (pattern FilterProvider)
+ * ========================================================= */
+typedef const AssistanceRequestArray *(*FilterProvider)(AssistanceRequestArray *list);
+static void show_filtered(AssistanceRequestArray *list, FilterProvider provider, const char *empty_message);
+static const AssistanceRequestArray *filter_status_provider(AssistanceRequestArray *list);
+static const AssistanceRequestArray *filter_priority_provider(AssistanceRequestArray *list);
+static const AssistanceRequestArray *filter_name_provider(AssistanceRequestArray *list);
+
+
+/* =========================================================
+ *  ENTRY POINT — menu principale
+ * ========================================================= */
+
+/**
+ * @brief Punto di ingresso dell'interfaccia utente.
+ *        Mostra la schermata iniziale e gestisce il ciclo del menu principale.
+ * @param list Elenco globale delle richieste di assistenza.
+ */
+void run_main_menu(AssistanceRequestArray *list)
 {
     int choice;
 
-       if (list == NULL) {
-            show_error_message("Lista richieste non valida.");
-            return;
-        }
+    if (list == NULL)
+    {
+        show_error_message("Lista richieste non valida.");
+        return;
+    }
+
+    print_splash_screen();
 
     do
     {
-        print_menu();
+        print_main_menu();
+        choice = read_int("Seleziona un'area: ");
+
+        switch (choice)
+        {
+            case 1: run_request_management_menu(list); break;
+            case 2: run_search_filter_menu(list);      break;
+            case 3: run_sort_menu(list);               break;
+            case 4: run_report_menu(list);             break;
+            case 5: run_save_menu(list);               break;
+            case 0: printf("\nArrivederci!\n");        break;
+            default:
+                show_error_message("Opzione non valida. Inserisci un numero valido del menu.");
+        }
+    } while (choice != 0);
+}
+
+
+/* =========================================================
+ *  SCHERMATA INIZIALE
+ * ========================================================= */
+
+/**
+ * @brief Stampa la schermata di benvenuto all'avvio del programma.
+ */
+static void print_splash_screen(void)
+{
+    printf("\n");
+    printf("+----------------------------------------------+\n");
+    printf("|     SISTEMA GESTIONE RICHIESTE ASSISTENZA    |\n");
+    printf("|              Tecnico  v1.0                   |\n");
+    printf("+----------------------------------------------+\n");
+    printf("\nBenvenuto! Seleziona un'area dal menu principale.\n\n");
+}
+
+
+/* =========================================================
+ *  MENU PRINCIPALE
+ * ========================================================= */
+
+/**
+ * @brief Stampa il menu principale con le aree funzionali disponibili.
+ */
+static void print_main_menu(void)
+{
+    printf("\n+----------------------------------+\n");
+    printf("|         MENU PRINCIPALE          |\n");
+    printf("+----------------------------------+\n");
+    printf("|  1. Gestione Richieste           |\n");
+    printf("|  2. Ricerca e Filtri             |\n");
+    printf("|  3. Ordinamenti                  |\n");
+    printf("|  4. Report                       |\n");
+    printf("|  5. Salvataggio                  |\n");
+    printf("|  0. Esci                         |\n");
+    printf("+----------------------------------+\n");
+}
+
+
+/* =========================================================
+ *  SOTTOMENU — AREA GESTIONE RICHIESTE
+ * ========================================================= */
+
+/**
+ * @brief Gestisce il sottomenu dell'area "Gestione Richieste".
+ *        Permette di inserire, modificare, annullare e visualizzare richieste.
+ * @param list Elenco globale delle richieste.
+ */
+static void run_request_management_menu(AssistanceRequestArray *list)
+{
+    int choice;
+
+    do
+    {
+        printf("\n+----------------------------------+\n");
+        printf("|       GESTIONE RICHIESTE         |\n");
+        printf("+----------------------------------+\n");
+        printf("|  1. Inserisci richiesta          |\n");
+        printf("|  2. Modifica richiesta           |\n");
+        printf("|  3. Annulla richiesta            |\n");
+        printf("|  4. Visualizza tutte le rich.    |\n");
+        printf("|  5. Visualizza dettaglio rich.   |\n");
+        printf("|  0. Torna al menu principale     |\n");
+        printf("+----------------------------------+\n");
+
+        choice = read_int("Seleziona un'opzione: ");
+
+        switch (choice)
+        {
+            case 1: insert_request_cli(list);      break;
+            case 2: update_request_cli(list);      break;
+            case 3: cancel_request_cli(list);      break;
+            case 4: show_all_requests(list);        break;
+            case 5: view_request_detail_cli(list); break;
+            case 0: break;
+            default: show_error_message("Opzione non valida.");
+        }
+    } while (choice != 0);
+}
+
+
+/* =========================================================
+ *  SOTTOMENU — AREA RICERCA E FILTRI
+ * ========================================================= */
+
+/**
+ * @brief Gestisce il sottomenu dell'area "Ricerca e Filtri".
+ *        Permette di cercare per codice e filtrare per stato, priorita' o cliente.
+ * @param list Elenco globale delle richieste.
+ */
+static void run_search_filter_menu(AssistanceRequestArray *list)
+{
+    int choice;
+
+    do
+    {
+        printf("\n+----------------------------------+\n");
+        printf("|        RICERCA E FILTRI          |\n");
+        printf("+----------------------------------+\n");
+        printf("|  1. Cerca per codice             |\n");
+        printf("|  2. Filtra per stato             |\n");
+        printf("|  3. Filtra per priorita'         |\n");
+        printf("|  4. Filtra per nome cliente      |\n");
+        printf("|  0. Torna al menu principale     |\n");
+        printf("+----------------------------------+\n");
+
+        choice = read_int("Seleziona un'opzione: ");
+
+        switch (choice)
+        {
+            case 1: search_request_cli(list);          break;
+            case 2: filter_by_status_cli(list);        break;
+            case 3: filter_by_priority_cli(list);      break;
+            case 4: filter_by_customer_name_cli(list); break;
+            case 0: break;
+            default: show_error_message("Opzione non valida.");
+        }
+    } while (choice != 0);
+}
+
+
+/* =========================================================
+ *  SOTTOMENU — AREA ORDINAMENTI
+ * ========================================================= */
+
+/**
+ * @brief Gestisce il sottomenu dell'area "Ordinamenti".
+ *        Permette di ordinare le richieste per nome cliente o costo stimato.
+ * @param list Elenco globale delle richieste.
+ */
+static void run_sort_menu(AssistanceRequestArray *list)
+{
+    int choice;
+
+    do
+    {
+        printf("\n+----------------------------------+\n");
+        printf("|          ORDINAMENTI             |\n");
+        printf("+----------------------------------+\n");
+        printf("|  1. Ordina per nome cliente      |\n");
+        printf("|  2. Ordina per costo stimato     |\n");
+        printf("|  0. Torna al menu principale     |\n");
+        printf("+----------------------------------+\n");
+
         choice = read_int("Seleziona un'opzione: ");
 
         switch (choice)
         {
             case 1:
-                show_all_requests(list);
+                sort_by_customer_name(list);
+                show_success_message("Ordinamento per nome cliente completato.");
                 break;
             case 2:
-                insert_request_cli(list);
-                break;
-            case 3 :
-                search_request_cli(list);
-                break;
-            case 4:
-                update_status_cli(list);
-                break;
-            case 5:
-                update_estimated_cost_cli(list);
-                break;
-            case 6:
-                update_final_cost_cli(list);
-                break;
-            case 7:
-                update_description_cli(list);
-                break;
-            case 8:
-                sort_by_customer_name(list);
-                show_success_message("Ordinamento per nome completato.");
-                break;
-            case 9:
                 sort_by_estimated_cost(list);
                 show_success_message("Ordinamento per costo stimato completato.");
                 break;
-            case 10: 
-                if (write_in_memory(list) == 0)
-                show_success_message("Salvataggio completato.");
-                else
-                show_error_message("Errore durante il salvataggio.");
-                break;
-            case 11:
-                filter_by_status_cli(list);
-                break;
-            case 12:
-                filter_by_priority_cli(list);
-                break;
-            case 13:
-                filter_by_customer_name_cli(list);
-                break;
-            case 14:
-                general_report_cli(list);
-                break;
-            case 15:
-                operative_report_cli(list);
-                break;
-            case 0:
-                printf("Uscita in corso...\n");
-                break;
-            default:
-                show_error_message("Opzione non valida. Inserisci un numero valido del menu.");
+            case 0: break;
+            default: show_error_message("Opzione non valida.");
         }
     } while (choice != 0);
-
 }
 
-void show_error_message(const char *message)
+
+/* =========================================================
+ *  SOTTOMENU — AREA REPORT
+ * ========================================================= */
+
+/**
+ * @brief Gestisce il sottomenu dell'area "Report".
+ *        Permette di generare il report generale o quello operativo.
+ * @param list Elenco globale delle richieste.
+ */
+static void run_report_menu(AssistanceRequestArray *list)
+{
+    int choice;
+
+    do
+    {
+        printf("\n+----------------------------------+\n");
+        printf("|             REPORT               |\n");
+        printf("+----------------------------------+\n");
+        printf("|  1. Report generale              |\n");
+        printf("|  2. Report operativo             |\n");
+        printf("|  0. Torna al menu principale     |\n");
+        printf("+----------------------------------+\n");
+
+        choice = read_int("Seleziona un'opzione: ");
+
+        switch (choice)
+        {
+            case 1: general_report_cli(list);   break;
+            case 2: operative_report_cli(list); break;
+            case 0: break;
+            default: show_error_message("Opzione non valida.");
+        }
+    } while (choice != 0);
+}
+
+
+/* =========================================================
+ *  SOTTOMENU — AREA SALVATAGGIO
+ * ========================================================= */
+
+/**
+ * @brief Gestisce il sottomenu dell'area "Salvataggio".
+ *        Permette di salvare i dati su file.
+ * @param list Elenco globale delle richieste.
+ */
+static void run_save_menu(AssistanceRequestArray *list)
+{
+    int choice;
+
+    do
+    {
+        printf("\n+----------------------------------+\n");
+        printf("|          SALVATAGGIO             |\n");
+        printf("+----------------------------------+\n");
+        printf("|  1. Salva su file                |\n");
+        printf("|  0. Torna al menu principale     |\n");
+        printf("+----------------------------------+\n");
+
+        choice = read_int("Seleziona un'opzione: ");
+
+        switch (choice)
+        {
+            case 1:
+                if (write_in_memory(list) == 0)
+                    show_success_message("Dati salvati correttamente su file.");
+                else
+                    show_error_message("Errore durante il salvataggio su file.");
+                break;
+            case 0: break;
+            default: show_error_message("Opzione non valida.");
+        }
+    } while (choice != 0);
+}
+
+/* =========================================================
+ *  MESSAGGI
+ * ========================================================= */
+
+/**
+ * @brief Stampa un messaggio di errore formattato.
+ * @param message Testo dell'errore da mostrare.
+ */
+static void show_error_message(const char *message)
 {
     printf("[ERRORE] %s\n", message);
 }
 
-void show_success_message(const char *message)
+/**
+ * @brief Stampa un messaggio di conferma/successo formattato.
+ * @param message Testo del messaggio di conferma.
+ */
+static void show_success_message(const char *message)
 {
     printf("[OK] %s\n", message);
 }
 
-void print_menu(void)
-{
-    printf("\n====== MENU PRINCIPALE ======\n");
-    printf("1. Visualizza tutte le richieste\n");
-    printf("2. Inserisci nuova richiesta\n");
-    printf("3. Cerca richiesta per codice\n");
-    printf("4. Aggiorna stato richiesta\n");
-    printf("5. Aggiorna costo stimato\n");
-    printf("6. Aggiorna costo finale\n");
-    printf("7. Aggiorna descrizione richiesta\n");
-    printf("8. Ordina per nome cliente\n");
-    printf("9. Ordina per costo stimato\n");
-    printf("10. Salva su file\n");
-    printf("11. Filtra per stato\n");
-    printf("12. Filtra per priorita'\n");
-    printf("13. Filtra per nome cliente\n");
-    printf("14. Report generale\n");
-    printf("15. Report operativo\n");
-    printf("0. Esci\n");
-    printf("\n=============================\n");
-}
 
+/* =========================================================
+ *  UTILITY DI INPUT
+ * ========================================================= */
+
+/**
+ * @brief Legge un intero da stdin, rifiutando input non validi.
+ * @param prompt Testo da mostrare all'utente prima dell'input.
+ * @return Intero inserito dall'utente.
+ */
 static int read_int(const char *prompt)
 {
     int value;
     char row[100];
     char extra;
 
-    while (1) {
+    while (1)
+    {
         printf("%s", prompt);
         fgets(row, sizeof(row), stdin);
 
-        if (sscanf(row, "%d %c", &value, &extra) == 1) {
+        if (sscanf(row, "%d %c", &value, &extra) == 1)
+        {
             return value;
         }
 
         show_error_message("Inserisci un numero intero valido.");
     }
 }
-    
+
+/**
+ * @brief Legge un float da stdin, rifiutando input non validi.
+ * @param prompt Testo da mostrare all'utente prima dell'input.
+ * @return Float inserito dall'utente.
+ */
 static float read_float(const char *prompt)
 {
     float value;
     char row[100];
     char extra;
 
-    while (1) {
+    while (1)
+    {
         printf("%s", prompt);
         fgets(row, sizeof(row), stdin);
 
-        if (sscanf(row, "%f %c", &value, &extra) == 1) {
+        if (sscanf(row, "%f %c", &value, &extra) == 1)
+        {
             return value;
         }
 
         show_error_message("Inserisci un numero valido.");
     }
 }
-    
+
+/**
+ * @brief Legge una stringa non vuota da stdin.
+ * @param prompt  Testo da mostrare all'utente prima dell'input.
+ * @param buffer  Buffer di destinazione.
+ * @param size    Dimensione massima del buffer.
+ */
 static void read_string(const char *prompt, char *buffer, int size)
 {
-    while (1) {
+    while (1)
+    {
         printf("%s", prompt);
         fgets(buffer, size, stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
 
-        if (strlen(buffer) > 0) {
+        if (strlen(buffer) > 0)
+        {
             return;
         }
 
@@ -196,12 +457,19 @@ static void read_string(const char *prompt, char *buffer, int size)
     }
 }
 
+/**
+ * @brief Verifica se una stringa contiene almeno una cifra numerica.
+ * @param string Stringa da analizzare.
+ * @return 1 se contiene una cifra, 0 altrimenti.
+ */
 static int has_digit(const char *string)
 {
     int i = 0;
 
-    while (string[i] != '\0') {
-        if (isdigit((unsigned char)string[i])) {
+    while (string[i] != '\0')
+    {
+        if (isdigit((unsigned char)string[i]))
+        {
             return 1;
         }
         i++;
@@ -210,80 +478,102 @@ static int has_digit(const char *string)
     return 0;
 }
 
-static DeviceType read_device_type(void) 
+/**
+ * @brief Presenta all'utente un menu per scegliere il tipo di dispositivo.
+ * @return Il DeviceType selezionato.
+ */
+static DeviceType read_device_type(void)
 {
     int choice;
 
     while (1)
     {
         printf("Tipo dispositivo:\n");
-        printf("1. Smartphone\n");
-        printf("2. Tablet\n");
-        printf("3. Laptop\n");
-        printf("4. Desktop\n");
-        printf("5. Printer\n");
+        printf("  1. Smartphone\n");
+        printf("  2. Tablet\n");
+        printf("  3. Laptop\n");
+        printf("  4. Desktop\n");
+        printf("  5. Stampante\n");
 
         choice = read_int("Scelta: ");
 
         switch (choice)
         {
-        case 1: return DEVICE_SMARTPHONE;
-        case 2: return DEVICE_TABLET;
-        case 3: return DEVICE_LAPTOP;
-        case 4: return DEVICE_DESKTOP;
-        case 5: return DEVICE_PRINTER;
-        default:
-            show_error_message("Tipo dispositivo non valido. Reinserisci la scelta.");
+            case 1: return DEVICE_SMARTPHONE;
+            case 2: return DEVICE_TABLET;
+            case 3: return DEVICE_LAPTOP;
+            case 4: return DEVICE_DESKTOP;
+            case 5: return DEVICE_PRINTER;
+            default:
+                show_error_message("Tipo dispositivo non valido. Reinserisci la scelta.");
         }
     }
 }
 
-static PriorityLevel read_priority_level(void) 
+/**
+ * @brief Presenta all'utente un menu per scegliere il livello di priorita'.
+ * @return Il PriorityLevel selezionato.
+ */
+static PriorityLevel read_priority_level(void)
 {
     int choice;
+
     while (1)
     {
-        printf("Priorita:\n");
-        printf("1. Low\n");
-        printf("2. Medium\n");
-        printf("3. High\n");
+        printf("Priorita':\n");
+        printf("  1. Bassa (LOW)\n");
+        printf("  2. Media (MEDIUM)\n");
+        printf("  3. Alta  (HIGH)\n");
 
         choice = read_int("Scelta: ");
 
         switch (choice)
         {
-        case 1: return PRIORITY_LOW;
-        case 2: return PRIORITY_MEDIUM;
-        case 3: return PRIORITY_HIGH;
-        default: show_error_message("Priorita non valida. Reinserisci la scelta.");
+            case 1: return PRIORITY_LOW;
+            case 2: return PRIORITY_MEDIUM;
+            case 3: return PRIORITY_HIGH;
+            default:
+                show_error_message("Priorita' non valida. Reinserisci la scelta.");
         }
     }
 }
 
-static RequestStatus read_status(void) 
+/**
+ * @brief Presenta all'utente un menu per scegliere lo stato della richiesta.
+ * @return Il RequestStatus selezionato.
+ */
+static RequestStatus read_status(void)
 {
     int choice;
+
     while (1)
     {
         printf("Stato richiesta:\n");
-        printf("1. Open\n");
-        printf("2. In progress\n");
-        printf("3. Closed\n");
-        printf("4. Canceled\n");
+        printf("  1. Aperta         (OPEN)\n");
+        printf("  2. In lavorazione (IN PROGRESS)\n");
+        printf("  3. Chiusa         (CLOSED)\n");
+        printf("  4. Annullata      (CANCELED)\n");
 
         choice = read_int("Scelta: ");
 
         switch (choice)
         {
-        case 1: return STATUS_OPEN;
-        case 2: return STATUS_IN_PROGRESS;
-        case 3: return STATUS_CLOSED;
-        case 4: return STATUS_CANCELED;
-        default: show_error_message("Stato non valido. Reinserisci la scelta.");
+            case 1: return STATUS_OPEN;
+            case 2: return STATUS_IN_PROGRESS;
+            case 3: return STATUS_CLOSED;
+            case 4: return STATUS_CANCELED;
+            default:
+                show_error_message("Stato non valido. Reinserisci la scelta.");
         }
     }
 }
 
+/**
+ * @brief Cerca una richiesta per codice all'interno dell'array.
+ * @param list Elenco globale delle richieste.
+ * @param code Codice da cercare.
+ * @return Puntatore alla richiesta trovata, o NULL se assente.
+ */
 static AssistanceRequest *find_request_by_code(AssistanceRequestArray *list, int code)
 {
     AssistanceRequest **array;
@@ -293,13 +583,15 @@ static AssistanceRequest *find_request_by_code(AssistanceRequestArray *list, int
         return NULL;
 
     array = get_assistance_request_array_ptr(list);
-    size = get_assistance_request_array_size(list);
+    size  = get_assistance_request_array_size(list);
 
     if (array == NULL || size < 0)
         return NULL;
 
-    for (int i = 0; i < size; i++) {
-        if (get_request_code(array[i]) == code) {
+    for (int i = 0; i < size; i++)
+    {
+        if (get_request_code(array[i]) == code)
+        {
             return array[i];
         }
     }
@@ -307,46 +599,73 @@ static AssistanceRequest *find_request_by_code(AssistanceRequestArray *list, int
     return NULL;
 }
 
-static AssistanceRequest *read_existing_request(AssistanceRequestArray *list) 
+/**
+ * @brief Chiede all'utente un codice e restituisce la richiesta corrispondente.
+ *        Riprova finche' il codice e' valido; inserendo -1 annulla l'operazione.
+ * @param list Elenco globale delle richieste.
+ * @return Puntatore alla richiesta trovata, o NULL se l'utente ha annullato.
+ */
+static AssistanceRequest *read_existing_request(AssistanceRequestArray *list)
 {
     int code;
     AssistanceRequest *request;
 
-    while (1) {
+    printf("(Inserisci -1 per annullare)\n");
+
+    while (1)
+    {
         code = read_int("Codice richiesta: ");
-        
-        if (code == -1) {
+
+        if (code == -1)
+        {
             return NULL;
         }
 
         request = search_by_request_code(list, code);
 
-        if (request != NULL) {
+        if (request != NULL)
+        {
             return request;
         }
 
-        show_error_message("Richiesta non trovata. Inserisci un codice valido.");
+        show_error_message("Richiesta non trovata. Inserisci un codice valido o -1 per annullare.");
     }
 }
 
+
+/* =========================================================
+ *  OPERAZIONI — GESTIONE RICHIESTE
+ * ========================================================= */
+
+/**
+ * @brief Mostra tutte le richieste presenti nell'elenco.
+ * @param list Elenco globale delle richieste.
+ */
 static void show_all_requests(AssistanceRequestArray *list)
 {
     AssistanceRequest **array;
     int size;
 
     array = get_assistance_request_array_ptr(list);
-    size = get_assistance_request_array_size(list);
+    size  = get_assistance_request_array_size(list);
 
-    if (array == NULL || size <= 0) {
+    if (array == NULL || size <= 0)
+    {
         printf("Nessuna richiesta presente.\n");
         return;
     }
 
-    for (int i = 0; i < size; i++) {
+    printf("\n--- Elenco richieste (%d) ---\n", size);
+    for (int i = 0; i < size; i++)
+    {
         print_request(array[i]);
     }
 }
 
+/**
+ * @brief Inserisce una nuova richiesta di assistenza raccogliendo tutti i campi dall'utente.
+ * @param list Elenco globale delle richieste.
+ */
 static void insert_request_cli(AssistanceRequestArray *list)
 {
     int code;
@@ -364,21 +683,19 @@ static void insert_request_cli(AssistanceRequestArray *list)
         if (code < 0)
         {
             show_error_message("Il codice deve essere un numero intero positivo.");
+            continue;
         }
 
-        AssistanceRequest *request_by_code = search_by_request_code(list, code);
-        if(request_by_code != NULL)
+        if (search_by_request_code(list, code) != NULL)
         {
-            show_error_message("Il codice inserito e' gia' utilizzato da un'altra richiesta");
+            show_error_message("Il codice inserito e' gia' utilizzato da un'altra richiesta.");
             code = -1;
         }
     } while (code < 0);
+
     read_string("Nome cliente: ", customer_name, MAX_CUSTOMER_NAME);
-
     type = read_device_type();
-
     read_string("Descrizione: ", description, MAX_DESCRIPTION);
-
     priority = read_priority_level();
 
     do
@@ -392,93 +709,154 @@ static void insert_request_cli(AssistanceRequestArray *list)
 
     do
     {
-        int day = read_int("Giorno: ");
+        int day   = read_int("Giorno: ");
         int month = read_int("Mese: ");
-        int year = read_int("Anno: ");
+        int year  = read_int("Anno: ");
 
         date = create_date(day, month, year);
 
         if (date.day == -1)
         {
-            show_error_message("Data non valida.");
+            show_error_message("Data non valida. Riprova.");
         }
     } while (date.day == -1);
 
     new_request = create_assistance_request(
-        code,
-        customer_name,
-        type,
-        description,
-        priority,
-        STATUS_OPEN,
-        estimated_cost,
-        0.0f,
-        date
+        code, customer_name, type, description,
+        priority, STATUS_OPEN, estimated_cost, 0.0f, date
     );
 
-    if (new_request == NULL) {
+    if (new_request == NULL)
+    {
         show_error_message("Creazione richiesta fallita.");
         return;
     }
 
     if (insert_assistance_request(list, new_request) == 0)
+    {
         show_success_message("Richiesta inserita correttamente.");
-    else {
+    }
+    else
+    {
         free_assistance_request(new_request);
         show_error_message("Inserimento fallito.");
     }
 }
 
-static void search_request_cli(AssistanceRequestArray *list)
+/**
+ * @brief Sottomenu di modifica di una richiesta esistente.
+ *        Permette di aggiornare stato, costo stimato, costo finale o descrizione.
+ * @param list Elenco globale delle richieste.
+ */
+static void update_request_cli(AssistanceRequestArray *list)
 {
-    int code;
+    int choice;
     AssistanceRequest *request;
-
-    code = read_int("Codice richiesta da cercare: ");
-
-    request = search_by_request_code(list, code);
-
-    if (request == NULL)
-    {
-        show_error_message("Richiesta non trovata.");
-        return;
-    }
-
-    print_request(request);
-}
-
-static void update_status_cli(AssistanceRequestArray *list)
-{
-    RequestStatus newStatus;
-    AssistanceRequest *request;
-    int result = -1;
 
     request = read_existing_request(list);
-
     if (request == NULL)
     {
         show_error_message("Operazione annullata.");
         return;
     }
 
-    newStatus = read_status();
+    printf("\n--- Richiesta selezionata ---\n");
+    print_request(request);
 
-    switch (newStatus)
+    do
     {
-    case STATUS_OPEN:
-        result = set_request_status_opened(request);
-        break;
-    case STATUS_IN_PROGRESS:
-        result = set_request_status_in_progress(request);
-        break;
-    case STATUS_CLOSED:
-        result = set_request_status_closed(request);
-        break;
-    case STATUS_CANCELED:
-        result = set_request_status_canceled(request);
-        break;
-    default:
-        result = -1;
+        printf("\n+----------------------------------+\n");
+        printf("|        MODIFICA RICHIESTA        |\n");
+        printf("+----------------------------------+\n");
+        printf("|  1. Modifica stato               |\n");
+        printf("|  2. Modifica costo stimato       |\n");
+        printf("|  3. Modifica costo finale        |\n");
+        printf("|  4. Modifica descrizione         |\n");
+        printf("|  0. Torna indietro               |\n");
+        printf("+----------------------------------+\n");
+
+        choice = read_int("Seleziona un'opzione: ");
+
+        switch (choice)
+        {
+            case 1: update_status_cli_on(request);        break;
+            case 2: update_estimated_cost_cli_on(request); break;
+            case 3: update_final_cost_cli_on(request);     break;
+            case 4: update_description_cli_on(request);    break;
+            case 0: break;
+            default: show_error_message("Opzione non valida.");
+        }
+    } while (choice != 0);
+}
+
+/**
+ * @brief Annulla una richiesta esistente impostando lo stato a CANCELED.
+ * @param list Elenco globale delle richieste.
+ */
+static void cancel_request_cli(AssistanceRequestArray *list)
+{
+    AssistanceRequest *request;
+
+    request = read_existing_request(list);
+    if (request == NULL)
+    {
+        show_error_message("Operazione annullata.");
+        return;
+    }
+
+    if (set_request_status_canceled(request) == 0)
+    {
+        show_success_message("Richiesta annullata correttamente.");
+    }
+    else
+    {
+        show_error_message("Impossibile annullare la richiesta.");
+    }
+}
+
+/**
+ * @brief Mostra il dettaglio completo di una singola richiesta cercata per codice.
+ * @param list Elenco globale delle richieste.
+ */
+static void view_request_detail_cli(AssistanceRequestArray *list)
+{
+    AssistanceRequest *request;
+
+    request = read_existing_request(list);
+    if (request == NULL)
+    {
+        show_error_message("Operazione annullata.");
+        return;
+    }
+
+    print_request(request);
+}
+
+
+/* =========================================================
+ *  OPERAZIONI DI MODIFICA — su puntatore diretto
+ *  Usate da update_request_cli per non rileggere il codice
+ *  a ogni campo modificato nella stessa sessione.
+ * ========================================================= */
+
+/**
+ * @brief Aggiorna lo stato di una richiesta gia' individuata.
+ * @param request Puntatore alla richiesta da modificare.
+ */
+static void update_status_cli_on(AssistanceRequest *request)
+{
+    RequestStatus new_status;
+    int result = -1;
+
+    new_status = read_status();
+
+    switch (new_status)
+    {
+        case STATUS_OPEN:        result = set_request_status_opened(request);      break;
+        case STATUS_IN_PROGRESS: result = set_request_status_in_progress(request); break;
+        case STATUS_CLOSED:      result = set_request_status_closed(request);      break;
+        case STATUS_CANCELED:    result = set_request_status_canceled(request);    break;
+        default:                 result = -1;
     }
 
     if (result == 0)
@@ -487,17 +865,14 @@ static void update_status_cli(AssistanceRequestArray *list)
         show_error_message("Aggiornamento stato fallito.");
 }
 
-static void update_estimated_cost_cli(AssistanceRequestArray *list)
+/**
+ * @brief Aggiorna il costo stimato di una richiesta gia' individuata.
+ * @param request Puntatore alla richiesta da modificare.
+ */
+static void update_estimated_cost_cli_on(AssistanceRequest *request)
 {
     float cost;
-    AssistanceRequest *request;
 
-    request = read_existing_request(list);
-
-    if (request == NULL) {
-        show_error_message("Operazione annullata.");
-        return;
-    }
     do
     {
         cost = read_float("Nuovo costo stimato: ");
@@ -513,38 +888,39 @@ static void update_estimated_cost_cli(AssistanceRequestArray *list)
         show_error_message("Aggiornamento costo stimato fallito.");
 }
 
-static void update_final_cost_cli(AssistanceRequestArray *list)
+/**
+ * @brief Aggiorna il costo finale di una richiesta gia' individuata.
+ *        Richiede che la richiesta sia nello stato CLOSED.
+ * @param request Puntatore alla richiesta da modificare.
+ */
+static void update_final_cost_cli_on(AssistanceRequest *request)
 {
     float cost;
-    AssistanceRequest *request;
 
-    request = read_existing_request(list);
-
-    if (request == NULL) {
-        show_error_message("Richiesta non trovata.");
-        return;
-    }
-
-    cost = read_float("Nuovo costo finale: ");
+    do
+    {
+        cost = read_float("Nuovo costo finale: ");
+        if (cost < 0)
+        {
+            show_error_message("Il costo finale deve essere un numero positivo.");
+        }
+    } while (cost < 0);
 
     if (set_final_cost(request, cost) == 0)
         show_success_message("Costo finale aggiornato.");
+    else
+        show_error_message("Aggiornamento costo finale fallito (la richiesta deve essere CLOSED).");
 }
 
-static void update_description_cli(AssistanceRequestArray *list)
+/**
+ * @brief Aggiorna la descrizione di una richiesta gia' individuata.
+ * @param request Puntatore alla richiesta da modificare.
+ */
+static void update_description_cli_on(AssistanceRequest *request)
 {
-    AssistanceRequest *request;
     char description[MAX_DESCRIPTION];
 
-    request = read_existing_request(list);
-
-    if (request == NULL)
-    {
-        show_error_message("Operazione annullata.");
-        return;
-    }
-
-    read_string("Nuova descrizione: ",description,MAX_DESCRIPTION);
+    read_string("Nuova descrizione: ", description, MAX_DESCRIPTION);
 
     if (set_description(request, description) == 0)
         show_success_message("Descrizione aggiornata.");
@@ -552,14 +928,37 @@ static void update_description_cli(AssistanceRequestArray *list)
         show_error_message("Aggiornamento descrizione fallito.");
 }
 
-/* Definiamo un tipo puntatore a funzione per astrarre e generalizzare la sorgente dei dati filtrati */
-typedef const AssistanceRequestArray *(*FilterProvider)(AssistanceRequestArray *list);
+
+/* =========================================================
+ *  OPERAZIONI — RICERCA E FILTRI
+ * ========================================================= */
+
+/**
+ * @brief Cerca e mostra una singola richiesta per codice.
+ * @param list Elenco globale delle richieste.
+ */
+static void search_request_cli(AssistanceRequestArray *list)
+{
+    int code;
+    AssistanceRequest *request;
+
+    code    = read_int("Codice richiesta da cercare: ");
+    request = search_by_request_code(list, code);
+
+    if (request == NULL)
+    {
+        show_error_message("Richiesta non trovata.");
+        return;
+    }
+
+    print_request(request);
+}
 
 /**
  * @brief Incapsula e centralizza la visualizzazione e la deallocazione dei sotto-array filtrati.
- * @param list Elenco globale delle richieste.
- * @param provider Call-back incaricata di erogare la specifica variante di filtro.
- * @param empty_message Testo da stampare sul terminale qualora nessun record soddisfi i criteri.
+ * @param list          Elenco globale delle richieste.
+ * @param provider      Callback incaricata di erogare la specifica variante di filtro.
+ * @param empty_message Testo da stampare qualora nessun record soddisfi i criteri.
  */
 static void show_filtered(AssistanceRequestArray *list, FilterProvider provider, const char *empty_message)
 {
@@ -576,7 +975,7 @@ static void show_filtered(AssistanceRequestArray *list, FilterProvider provider,
     }
 
     array = get_assistance_request_array_ptr(filtered);
-    size = get_assistance_request_array_size(filtered);
+    size  = get_assistance_request_array_size(filtered);
 
     if (size <= 0)
     {
@@ -584,13 +983,14 @@ static void show_filtered(AssistanceRequestArray *list, FilterProvider provider,
     }
     else
     {
+        printf("\n--- Risultati filtro (%d) ---\n", size);
         for (int i = 0; i < size; i++)
         {
             print_request(array[i]);
         }
     }
 
-    /* Rilascio "shallow" (superficiale) dell'oggetto array temporaneo per salvaguardare le entità reali presenti in lista */
+    /* Rilascio "shallow" dell'oggetto array temporaneo per salvaguardare le entita' reali in lista */
     free_assistance_request_array_shallow((AssistanceRequestArray *)filtered);
 }
 
@@ -625,6 +1025,11 @@ static void filter_by_customer_name_cli(AssistanceRequestArray *list)
 {
     show_filtered(list, filter_name_provider, "Nessuna richiesta trovata per il cliente specificato.");
 }
+
+
+/* =========================================================
+ *  OPERAZIONI — REPORT
+ * ========================================================= */
 
 /**
  * @brief Mostra il report generale: statistiche aggregate su tutte le richieste.
