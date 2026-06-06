@@ -40,6 +40,12 @@ const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, Re
     }
 
     int size = get_assistance_request_array_size(arr);
+    if(size == 0)
+    {
+        fprintf(stderr, "Nessuna richiesta da filtrare\n");
+        return NULL;
+    }
+
     AssistanceRequest **original_array = get_assistance_request_array_ptr(arr);
 
     /* Allocazione prudenziale iniziale della dimensione massima potenziale del sotto-array */
@@ -58,6 +64,13 @@ const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, Re
         {
             filtered_array[filtered_array_size++] = original_array[i];
         }
+    }
+
+    if(filtered_array_size == 0)
+    {
+        fprintf(stderr, "Nessuna richiesta trovata\n");
+        free(filtered_array);
+        return NULL;
     }
 
     /* Contrazione della memoria allocata per adattarla esattamente al numero di elementi effettivamente trovati */

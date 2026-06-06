@@ -14,9 +14,9 @@ static void read_string(const char *prompt, char *buffer, int size);
 static int has_digit(const char *string);
 static AssistanceRequest *read_existing_request(AssistanceRequestArray *list);
 
-void show_error_message(const char *message);
-void show_success_message(const char *message);
-void show_request_message(const AssistanceRequest *request);
+static void show_error_message(const char *message);
+static void show_success_message(const char *message);
+static void show_request_message(const AssistanceRequest *request);
 
 static const char *device_to_string(DeviceType type);
 static const char *priority_to_string(PriorityLevel level);
