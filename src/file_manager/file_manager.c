@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #define LINE_LENGTH 1024
 
+/**
+ * @brief Dealloca l'array di puntatori locale in caso di errore durante il parsing.
+ * @param arr Array di puntatori a richieste parzialmente allocato.
+ * @param size Numero di elementi attualmente allocati nell'array.
+ */
 void free_array(AssistanceRequest **arr, int size)
 {
     for (int i = 0; i < size; i++)
@@ -13,6 +18,12 @@ void free_array(AssistanceRequest **arr, int size)
     free(arr);
 }
 
+/**
+ * @brief Gestisce la chiusura del file e la pulizia della memoria a seguito di un errore di lettura.
+ * @param arr Array di puntatori da liberare.
+ * @param size Elementi inseriti fino al momento dell'errore.
+ * @param fp Puntatore al file di testo aperto.
+ */
 void manage_error(AssistanceRequest **arr, int size, FILE *fp)
 {
     free_array(arr, size);
@@ -50,6 +61,7 @@ AssistanceRequestArray *read_from_memory()
 
     char line[LINE_LENGTH];
 
+    /* Lettura riga per riga del file di testo fino alla fine del documento */
     while (fgets(line, LINE_LENGTH, fp))
     {
         if (size == capacity)
@@ -102,6 +114,7 @@ AssistanceRequestArray *read_from_memory()
         }
         DeviceType device_type;
 
+        /* Conversione della stringa testuale nell'enumerato DeviceType corrispondente */
         if (strcmp(token, "SMARTPHONE") == 0)
             device_type = DEVICE_SMARTPHONE;
         else if (strcmp(token, "TABLET") == 0)
@@ -294,6 +307,7 @@ int write_in_memory(AssistanceRequestArray *assistance_request_array)
         DeviceType device_type = get_device_type(array[i]);
         const char *device_str;
 
+        /* Mappatura dell'enumerato DeviceType nella corrispondente stringa per il file di testo */
         switch (device_type)
         {
         case DEVICE_SMARTPHONE:

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+/* Puntatore a funzione per uniformare i criteri di verifica delle singole richieste */
 typedef int (*Comparator)(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name);
 
 int check_status(AssistanceRequest *ass, RequestStatus status, PriorityLevel priority, char *customer_name)
@@ -21,6 +22,15 @@ int check_customer_name(AssistanceRequest *ass, RequestStatus status, PriorityLe
     return strcmp(get_customer_name(ass), customer_name) == 0;
 }
 
+/**
+ * @brief Funzione interna generica per l'estrazione e il filtraggio dei record.
+ * @param arr Array sorgente da esaminare.
+ * @param status Criterio di stato opzionale passato al comparatore.
+ * @param priority Criterio di priorità opzionale passato al comparatore.
+ * @param customer_name Criterio testuale opzionale passato al comparatore.
+ * @param comp Funzione di callback (predicato) per valutare la corrispondenza dell'elemento.
+ * @return Un nuovo blocco array allocato con i soli elementi validi, o NULL in caso di errore.
+ */
 const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, RequestStatus status, PriorityLevel priority, char *customer_name, Comparator comp)
 {
     if (arr == NULL)
@@ -32,6 +42,7 @@ const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, Re
     int size = get_assistance_request_array_size(arr);
     AssistanceRequest **original_array = get_assistance_request_array_ptr(arr);
 
+    /* Allocazione prudenziale iniziale della dimensione massima potenziale del sotto-array */
     AssistanceRequest **filtered_array = malloc(size * sizeof(AssistanceRequest *));
     if (filtered_array == NULL)
     {
@@ -49,6 +60,7 @@ const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, Re
         }
     }
 
+    /* Contrazione della memoria allocata per adattarla esattamente al numero di elementi effettivamente trovati */
     AssistanceRequest **temp = realloc(filtered_array, filtered_array_size * sizeof(AssistanceRequest *));
     if (temp == NULL)
     {

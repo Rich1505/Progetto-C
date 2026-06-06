@@ -39,7 +39,7 @@ static void filter_by_status_cli(AssistanceRequestArray *list);
 static void filter_by_priority_cli(AssistanceRequestArray *list);
 static void filter_by_customer_name_cli(AssistanceRequestArray *list);
 
-void run_main_menu(AssistanceRequestArray *list) //questa funzione gestisce il menu principale, mostrando le opzioni e chiamando le funzioni corrispondenti in base alla scelta dell'utente.
+void run_main_menu(AssistanceRequestArray *list) 
 {
     int choice;
 
@@ -142,6 +142,7 @@ void show_request_message(const AssistanceRequest *request)
     printf("Data apertura: %02d/%02d/%04d\n",data.day, data.month, data.year);
     printf("--------------------------------------------\n");
 }
+
 void print_menu(void)
 {
     printf("\n====== MENU PRINCIPALE ======\n");
@@ -161,8 +162,6 @@ void print_menu(void)
     printf("0. Esci\n");
     printf("\n=============================\n");
 }
-
-//questi sono input, gestendo anche il buffer per evitare problemi con input misti (numerici e stringhe).
 
 static int read_int(const char *prompt)
 {
@@ -229,9 +228,7 @@ static int has_digit(const char *string)
     return 0;
 }
 
-//questo è per convertire i tipi enum in stringhe leggibili, utile per la visualizzazione delle richieste.
-
-static const char *device_to_string(DeviceType type) //questa funzione converte i tipi di dispositivo in stringhe leggibili.
+static const char *device_to_string(DeviceType type) 
 {
     switch (type) {
         case DEVICE_SMARTPHONE: return "SMARTPHONE";
@@ -243,7 +240,7 @@ static const char *device_to_string(DeviceType type) //questa funzione converte 
     }
 }
 
-static const char *priority_to_string(PriorityLevel level) //questa funzione converte i livelli di priorità in stringhe leggibili.
+static const char *priority_to_string(PriorityLevel level) 
 {
     switch (level) {
         case PRIORITY_LOW:    return "LOW";
@@ -253,7 +250,7 @@ static const char *priority_to_string(PriorityLevel level) //questa funzione con
     }
 }
 
-static const char *status_to_string(RequestStatus status) //questa funzione converte gli stati delle richieste in stringhe leggibili.
+static const char *status_to_string(RequestStatus status) 
 {
     switch (status) {
         case STATUS_OPEN:        return "OPEN";
@@ -263,15 +260,12 @@ static const char *status_to_string(RequestStatus status) //questa funzione conv
     }
 }
 
-//queste funzioni leggono i valori di tipo enum, restituendo il valore corrispondente o un valore di errore se la scelta non è valida.
-
-static DeviceType read_device_type(void) // questa legge il tipo di dispositivo scelto dall'utente, restituendo il valore enum corrispondente o un valore di errore se la scelta non è valida.
+static DeviceType read_device_type(void) 
 {
     int choice;
 
     while (1)
     {
-
         printf("Tipo dispositivo:\n");
         printf("1. Smartphone\n");
         printf("2. Tablet\n");
@@ -294,7 +288,7 @@ static DeviceType read_device_type(void) // questa legge il tipo di dispositivo 
     }
 }
 
-static PriorityLevel read_priority_level(void) // questa legge il livello di priorità scelto dall'utente, restituendo il valore enum corrispondente o un valore di errore se la scelta non è valida.
+static PriorityLevel read_priority_level(void) 
 {
     int choice;
     while (1)
@@ -316,7 +310,7 @@ static PriorityLevel read_priority_level(void) // questa legge il livello di pri
     }
 }
 
-static RequestStatus read_status(void) //questa legge lo stato della richiesta scelto dall'utente, restituendo il valore enum corrispondente o un valore di errore se la scelta non è valida.
+static RequestStatus read_status(void) 
 {
     int choice;
     while (1)
@@ -338,13 +332,7 @@ static RequestStatus read_status(void) //questa legge lo stato della richiesta s
     }
 }
 
-//questa funzione cerca una richiesta per codice, restituendo un puntatore alla richiesta se trovata o NULL se non trovata o in caso di errori. 
-//Viene utilizzata nelle funzioni di aggiornamento per identificare la richiesta da modificare.
-
-static AssistanceRequest *find_request_by_code(
-    AssistanceRequestArray *list,
-    int code
-)
+static AssistanceRequest *find_request_by_code(AssistanceRequestArray *list, int code)
 {
     AssistanceRequest **array;
     int size;
@@ -365,10 +353,9 @@ static AssistanceRequest *find_request_by_code(
     }
 
     return NULL;
-
 }
 
-static AssistanceRequest *read_existing_request(AssistanceRequestArray *list) //questa funzione legge un codice di richiesta esistente, restituendo un puntatore alla richiesta se trovata o NULL se non trovata o in caso di errori. 
+static AssistanceRequest *read_existing_request(AssistanceRequestArray *list) 
 {
     int code;
     AssistanceRequest *request;
@@ -389,10 +376,6 @@ static AssistanceRequest *read_existing_request(AssistanceRequestArray *list) //
         show_error_message("Richiesta non trovata. Inserisci un codice valido.");
     }
 }
-
-//questa funzione mostra tutte le richieste presenti nella lista, 
-//utilizzando la funzione show_request_message per visualizzare i dettagli di ogni richiesta. 
-//Se la lista è vuota o non valida, viene mostrato un messaggio di errore.
 
 static void show_all_requests(AssistanceRequestArray *list)
 {
@@ -542,11 +525,12 @@ static void update_status_cli(AssistanceRequestArray *list)
     default:
         result = -1;
 
-        if (result == 0)
+    }
+
+    if (result == 0)
             show_success_message("Stato aggiornato.");
         else
             show_error_message("Aggiornamento stato fallito.");
-    }
 }
 
 static void update_estimated_cost_cli(AssistanceRequestArray *list)
@@ -614,18 +598,22 @@ static void update_description_cli(AssistanceRequestArray *list)
         show_error_message("Aggiornamento descrizione fallito.");
 }
 
-//FilterProvider è un function pointer che riceve la lista e restituisce un array filtrato.
-//Permette a show_filtered di gestire la logica comune (controllo NULL, stampa, free)
-//senza duplicarla nelle tre funzioni specifiche
-
+/* Definiamo un tipo puntatore a funzione per astrarre e generalizzare la sorgente dei dati filtrati */
 typedef const AssistanceRequestArray *(*FilterProvider)(AssistanceRequestArray *list);
 
+/**
+ * @brief Incapsula e centralizza la visualizzazione e la deallocazione dei sotto-array filtrati.
+ * @param list Elenco globale delle richieste.
+ * @param provider Call-back incaricata di erogare la specifica variante di filtro.
+ * @param empty_message Testo da stampare sul terminale qualora nessun record soddisfi i criteri.
+ */
 static void show_filtered(AssistanceRequestArray *list, FilterProvider provider, const char *empty_message)
 {
     const AssistanceRequestArray *filtered;
     AssistanceRequest **array;
     int size;
 
+    /* Invocazione del puntatore a funzione per generare la lista filtrata specifica */
     filtered = provider(list);
 
     if (filtered == NULL)
@@ -648,11 +636,9 @@ static void show_filtered(AssistanceRequestArray *list, FilterProvider provider,
         }
     }
 
+    /* Rilascio "shallow" (superficiale) dell'oggetto array temporaneo per salvaguardare le entità reali presenti in lista */
     free_assistance_request_array_shallow((AssistanceRequestArray *)filtered);
 }
-
-//queste tre funzioni leggono l'input specifico, chiamano il filtro corrispondente
-//e delegano tutta la logica comune a show_filtered.
 
 static const AssistanceRequestArray *filter_status_provider(AssistanceRequestArray *list)
 {

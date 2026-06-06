@@ -2,6 +2,13 @@
 #include<stdlib.h>
 #include<stdio.h>
 
+/**
+ * @brief Esegue una ricerca sequenziale (lineare) all'interno di un array di puntatori a richieste.
+ * @param arr Array di puntatori a richieste di assistenza.
+ * @param size Numero di elementi presenti nell'array.
+ * @param request_code Codice identificativo da cercare.
+ * @return L'indice dell'elemento se trovato, altrimenti -1.
+ */
 int linear_search(AssistanceRequest **arr, int size, int request_code) {
     for(int i = 0;i < size; i++)
     {

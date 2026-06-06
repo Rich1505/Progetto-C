@@ -3,7 +3,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-//I nostri comparatori restituiranno un valore < 0 se il primo elemento viene prima del secondo, 0 se sono uguali e > 0 se il secondo elemento viene prima del primo
+/* I nostri comparatori restituiranno un valore < 0 se il primo elemento viene prima del secondo, 0 se sono uguali e > 0 se il secondo elemento viene prima del primo */
 typedef int (*Comparator)(AssistanceRequest*, AssistanceRequest*);
 
 int compare_by_estimated_cost(AssistanceRequest *a, AssistanceRequest *b)
@@ -21,12 +21,22 @@ int compare_by_customer_name(AssistanceRequest *a, AssistanceRequest *b)
     return strcmp(get_customer_name(a), get_customer_name(b));
 }
 
+/**
+ * @brief Unisce due sotto-array ordinati in un unico blocco coeso e ordinato.
+ * @param arr Array di puntatori complessivo.
+ * @param l Indice sinistro del primo sotto-array.
+ * @param m Indice mediano che separa i due sotto-array.
+ * @param r Indice destro del secondo sotto-array.
+ * @param comp Puntatore alla funzione di comparazione da applicare.
+ * @return 0 in caso di successo, -1 se l'allocazione temporanea fallisce.
+ */
 int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp)
 {
     int i, j, k;
     int n1 = m - l + 1;
     int n2 = r - m;
 
+    /* Allocazione dinamica dei buffer ausiliari temporanei per contenere le due metà */
     AssistanceRequest **L = (AssistanceRequest **)malloc(n1 * sizeof(AssistanceRequest *));
     AssistanceRequest **R = (AssistanceRequest **)malloc(n2 * sizeof(AssistanceRequest *));
     
@@ -48,6 +58,7 @@ int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp)
     j = 0;
     k = l;
 
+    /* Fusione dei due buffer intermedi all'interno dell'array principale in base all'esito del comparatore */
     while (i < n1 && j < n2) {
         if (comp(L[i], R[j]) <= 0) {
             arr[k] = L[i];
@@ -72,12 +83,21 @@ int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp)
         k++;
     }
 
+    /* Rilascio dei blocchi temporanei allocati all'inizio della procedura */
     free(L);
     free(R);
 
     return 0;
 }
 
+/**
+ * @brief Funzione ricorsiva interna che implementa l'algoritmo Merge Sort.
+ * @param arr Array di puntatori da ordinare.
+ * @param l Indice iniziale della porzione corrente.
+ * @param r Indice finale della porzione corrente.
+ * @param comp Puntatore alla funzione di comparazione.
+ * @return 0 in caso di successo, -1 se si verifica un errore a cascata nelle chiamate interne.
+ */
 int merge_sort(AssistanceRequest **arr, int l, int r, Comparator comp)
 {
     if (l < r) {
