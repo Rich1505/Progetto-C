@@ -489,9 +489,34 @@ static void read_string(const char *prompt, char *buffer, int size)
     while (1)
     {
         printf("%s", prompt);
-        fgets(buffer, size, stdin);
-        buffer[strcspn(buffer, "\n")] = '\0';
+        
+        // Se fgets restituisce NULL, si è verificato un errore o EOF
+        if (fgets(buffer, size, stdin) == NULL) {
+            continue; 
+        }
 
+        // Cerchiamo la posizione del carattere di nuova riga
+        size_t newline_pos = strcspn(buffer, "\n");
+
+        // Controllo del troncamento:
+        // Se non c'è il '\n' E il buffer è pieno fino al limite (size - 1)
+        if (buffer[newline_pos] == '\0' && (int)strlen(buffer) == size - 1)
+        {
+            show_error_message("Attenzione: l'input inserito supera il limite e verra' troncato.");
+            
+            // Svuotiamo il buffer di input (stdin) fino al newline o a EOF
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF) {
+                // Ciclo vuoto: consuma i caratteri residui
+            }
+        }
+        else
+        {
+            // Se il newline è presente, lo sovrascriviamo con il terminatore
+            buffer[newline_pos] = '\0';
+        }
+
+        // Controllo se la stringa risultante è vuota
         if (strlen(buffer) > 0)
         {
             return;
