@@ -47,6 +47,11 @@ AssistanceRequestArray *read_from_memory()
     int size = 0;
 
     AssistanceRequest **array = malloc(capacity * sizeof(AssistanceRequest *));
+    if(array == NULL)
+    {
+        fprintf(stderr, "Errore allocazione memoria\n");
+        return NULL;
+    }
 
     char line[LINE_LENGTH];
 
@@ -247,7 +252,6 @@ AssistanceRequestArray *read_from_memory()
 
         if (assistance_request == NULL)
         {
-            fprintf(stderr, "Errore allocazione memoria\n");
             manage_error(array, size, fp);
             return NULL;
         }
