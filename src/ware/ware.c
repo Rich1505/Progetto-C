@@ -257,12 +257,24 @@ AssistanceRequestArray *copy_assistance_request_array(const AssistanceRequestArr
     AssistanceRequest **original_arr = get_assistance_request_array_ptr(src);
 
     AssistanceRequest **new_arr = malloc(capacity * sizeof(AssistanceRequest *));
+    if(new_arr == NULL)
+    {
+        fprintf(stderr, "Errore copy_assistance_request_array: Allocazione memoria non riuscita\n");
+        return NULL;
+    }
+
     for(int i = 0;i < size;i++)
     {
         new_arr[i] = copy_assistance_request(original_arr[i]);
     }
 
     AssistanceRequestArray *dest = malloc(sizeof(AssistanceRequestArray));
+    if(dest == NULL)
+    {
+        fprintf(stderr, "Errore copy_assistance_request_array: Allocazione memoria non riuscita\n");
+        return NULL;
+    }
+
     dest->array = new_arr;
     dest->size = size;
     dest->capacity = capacity;

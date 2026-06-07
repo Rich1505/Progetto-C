@@ -15,7 +15,6 @@
 static int   read_int(const char *prompt);
 static float read_float(const char *prompt);
 static void  read_string(const char *prompt, char *buffer, int size);
-static int   has_digit(const char *string);
 
 static void show_error_message(const char *message);
 static void show_success_message(const char *message);
@@ -26,7 +25,6 @@ static PriorityLevel read_priority_level(void);
 static RequestStatus read_status(void);
 
 static AssistanceRequest *read_existing_request(AssistanceRequestArray *list);
-static AssistanceRequest *find_request_by_code(AssistanceRequestArray *list, int code);
 
 /* =========================================================
  *  FORWARD DECLARATIONS — menu principali e sottomenù
@@ -504,27 +502,6 @@ static void read_string(const char *prompt, char *buffer, int size)
 }
 
 /**
- * @brief Verifica se una stringa contiene almeno una cifra numerica.
- * @param string Stringa da analizzare.
- * @return 1 se contiene una cifra, 0 altrimenti.
- */
-static int has_digit(const char *string)
-{
-    int i = 0;
-
-    while (string[i] != '\0')
-    {
-        if (isdigit((unsigned char)string[i]))
-        {
-            return 1;
-        }
-        i++;
-    }
-
-    return 0;
-}
-
-/**
  * @brief Presenta all'utente un menu per scegliere il tipo di dispositivo.
  * @return Il DeviceType selezionato.
  */
@@ -612,37 +589,6 @@ static RequestStatus read_status(void)
                 show_error_message("Stato non valido. Reinserisci la scelta.");
         }
     }
-}
-
-/**
- * @brief Cerca una richiesta per codice all'interno dell'array.
- * @param list Elenco globale delle richieste.
- * @param code Codice da cercare.
- * @return Puntatore alla richiesta trovata, o NULL se assente.
- */
-static AssistanceRequest *find_request_by_code(AssistanceRequestArray *list, int code)
-{
-    AssistanceRequest **array;
-    int size;
-
-    if (list == NULL)
-        return NULL;
-
-    array = get_assistance_request_array_ptr(list);
-    size  = get_assistance_request_array_size(list);
-
-    if (array == NULL || size < 0)
-        return NULL;
-
-    for (int i = 0; i < size; i++)
-    {
-        if (get_request_code(array[i]) == code)
-        {
-            return array[i];
-        }
-    }
-
-    return NULL;
 }
 
 /**

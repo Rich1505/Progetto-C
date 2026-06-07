@@ -109,9 +109,11 @@ void general_requests_report(const AssistanceRequestArray *list)
         printf("N/D (Nessuna richiesta completata)\n");
     }
     
+    AssistanceRequest **sorted_array_ptr = get_assistance_request_array_ptr(sorted_array);
+
     for(int i = 0;i < size;i++)
     {
-        print_request(arr[i]);
+        print_request(sorted_array_ptr[i]);
     }
 
     printf("==================================================\n");
