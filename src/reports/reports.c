@@ -19,6 +19,7 @@ void general_requests_report(const AssistanceRequestArray *list)
     int open_status_requests_number = 0;
     int in_progress_status_requests_number = 0;
     int closed_status_requests_number = 0;
+    int cancelled_status_requests_number = 0;
 
     int low_priority_requests_number = 0;
     int medium_priority_requests_number = 0;
@@ -41,6 +42,9 @@ void general_requests_report(const AssistanceRequestArray *list)
             case STATUS_CLOSED:
                 closed_status_requests_number++;
                 final_cost_sum += get_final_cost(arr[i]);
+                break;
+            case STATUS_CANCELED:
+                cancelled_status_requests_number++;
                 break;
         }
 
@@ -88,6 +92,7 @@ void general_requests_report(const AssistanceRequestArray *list)
     printf("    - Aperte (OPEN):         %d\n", open_status_requests_number);
     printf("    - In Corso (IN PROGRESS): %d\n", in_progress_status_requests_number);
     printf("    - Chiuse (CLOSED):        %d\n\n", closed_status_requests_number);
+    printf("    - Cancellate (CANCELLED):        %d\n\n", cancelled_status_requests_number);
 
     printf("iii. Richieste per PRIORITA':\n");
     printf("     - Alta (HIGH):   %d\n", high_priority_requests_number);

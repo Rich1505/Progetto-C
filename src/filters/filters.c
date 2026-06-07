@@ -22,10 +22,10 @@ static int check_customer_name(AssistanceRequest *ass, RequestStatus status, Pri
  * @param comp Funzione di callback (predicato) per valutare la corrispondenza dell'elemento.
  * @return Un nuovo blocco array allocato con i soli elementi validi, o NULL in caso di errore.
  */
-static const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, RequestStatus status, PriorityLevel priority, char *customer_name, Comparator comp);
+static AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, RequestStatus status, PriorityLevel priority, char *customer_name, Comparator comp);
 
 
-static const AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, RequestStatus status, PriorityLevel priority, char *customer_name, Comparator comp)
+static AssistanceRequestArray *filter(const AssistanceRequestArray *const arr, RequestStatus status, PriorityLevel priority, char *customer_name, Comparator comp)
 {
     if (arr == NULL)
     {
@@ -68,37 +68,34 @@ static const AssistanceRequestArray *filter(const AssistanceRequestArray *const 
     }
 
     /* Contrazione della memoria allocata per adattarla esattamente al numero di elementi effettivamente trovati */
-    AssistanceRequest **temp = realloc(filtered_array, filtered_array_size * sizeof(AssistanceRequest *));
-    if (temp == NULL)
+    if (filtered_array_size < size)
     {
-        if(size != 0)
+        AssistanceRequest **temp = realloc(filtered_array, filtered_array_size * sizeof(AssistanceRequest *));
+        if (temp == NULL)
         {
             fprintf(stderr, "Errore filter: riallocazione fallita\n");
             free(filtered_array);
+            return NULL;
         }
-        else
-            fprintf(stderr, "Nessuna richiesta e' stata trovata\n");
-
-        return NULL;
+        filtered_array = temp;
     }
-    filtered_array = temp;
 
     AssistanceRequestArray *filtered_array_object = create_assistance_request_array(filtered_array, filtered_array_size, filtered_array_size);
 
     return filtered_array_object;
 }
 
-const AssistanceRequestArray *filter_by_priority(const AssistanceRequestArray *const arr, PriorityLevel priority)
+AssistanceRequestArray *filter_by_priority(const AssistanceRequestArray *const arr, PriorityLevel priority)
 {
     return filter(arr, 0, priority, NULL, check_priority);
 }
 
-const AssistanceRequestArray *filter_by_status(const AssistanceRequestArray *const arr, RequestStatus status)
+AssistanceRequestArray *filter_by_status(const AssistanceRequestArray *const arr, RequestStatus status)
 {
     return filter(arr, status, 0, NULL, check_status);
 }
 
-const AssistanceRequestArray *filter_by_customer_name(const AssistanceRequestArray *const arr, char *customer_name)
+AssistanceRequestArray *filter_by_customer_name(const AssistanceRequestArray *const arr, char *customer_name)
 {
     return filter(arr, 0, 0, customer_name, check_customer_name);
 }

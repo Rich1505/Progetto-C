@@ -15,11 +15,11 @@
  * @brief Calcola e stampa le statistiche per tipologia di dispositivo.
  * Mostra il numero di richieste, il costo medio e il costo finale più alto.
  */
-void print_stats_by_device_type(AssistanceRequestArray *list);
+void print_stats_by_device_type(const AssistanceRequestArray *list);
 
 /**
  * @brief Calcola e stampa le statistiche per livello di priorità
  */
-void print_stats_by_priority(AssistanceRequestArray *list);
+void print_stats_by_priority(const AssistanceRequestArray *list);
 
 #endif //STATS_H

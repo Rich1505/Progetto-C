@@ -16,6 +16,8 @@ static int   read_int(const char *prompt);
 static float read_float(const char *prompt);
 static void  read_string(const char *prompt, char *buffer, int size);
 
+static void replace_char(char *str, char old_char, char new_char);
+
 static void show_error_message(const char *message);
 static void show_success_message(const char *message);
 static void print_splash_screen(void);
@@ -72,11 +74,11 @@ static void update_description_cli_on(AssistanceRequest *request);
 /* =========================================================
  *  FORWARD DECLARATIONS — filtri (pattern FilterProvider)
  * ========================================================= */
-typedef const AssistanceRequestArray *(*FilterProvider)(AssistanceRequestArray *list);
+typedef AssistanceRequestArray *(*FilterProvider)(AssistanceRequestArray *list);
 static void show_filtered(AssistanceRequestArray *list, FilterProvider provider, const char *empty_message);
-static const AssistanceRequestArray *filter_status_provider(AssistanceRequestArray *list);
-static const AssistanceRequestArray *filter_priority_provider(AssistanceRequestArray *list);
-static const AssistanceRequestArray *filter_name_provider(AssistanceRequestArray *list);
+static AssistanceRequestArray *filter_status_provider(AssistanceRequestArray *list);
+static AssistanceRequestArray *filter_priority_provider(AssistanceRequestArray *list);
+static AssistanceRequestArray *filter_name_provider(AssistanceRequestArray *list);
 
 /* =========================================================
  *  FORWARD DECLARATIONS — statistiche
@@ -543,7 +545,7 @@ static void read_string(const char *prompt, char *buffer, int size)
         
         // Se fgets restituisce NULL, si è verificato un errore o EOF
         if (fgets(buffer, size, stdin) == NULL) {
-            continue; 
+            return; 
         }
 
         // Cerchiamo la posizione del carattere di nuova riga
@@ -566,6 +568,9 @@ static void read_string(const char *prompt, char *buffer, int size)
             // Se il newline è presente, lo sovrascriviamo con il terminatore
             buffer[newline_pos] = '\0';
         }
+        
+        // Per evitare l'invalidazione durante il caricamento da file
+        replace_char(buffer, ';', ',');
 
         // Controllo se la stringa risultante è vuota
         if (strlen(buffer) > 0)
@@ -1030,7 +1035,7 @@ static void search_request_cli(AssistanceRequestArray *list)
  */
 static void show_filtered(AssistanceRequestArray *list, FilterProvider provider, const char *empty_message)
 {
-    const AssistanceRequestArray *filtered;
+    AssistanceRequestArray *filtered;
     AssistanceRequest **array;
     int size;
 
@@ -1062,17 +1067,17 @@ static void show_filtered(AssistanceRequestArray *list, FilterProvider provider,
     free_assistance_request_array_shallow((AssistanceRequestArray *)filtered);
 }
 
-static const AssistanceRequestArray *filter_status_provider(AssistanceRequestArray *list)
+static AssistanceRequestArray *filter_status_provider(AssistanceRequestArray *list)
 {
     return filter_by_status(list, read_status());
 }
 
-static const AssistanceRequestArray *filter_priority_provider(AssistanceRequestArray *list)
+static AssistanceRequestArray *filter_priority_provider(AssistanceRequestArray *list)
 {
     return filter_by_priority(list, read_priority_level());
 }
 
-static const AssistanceRequestArray *filter_name_provider(AssistanceRequestArray *list)
+static AssistanceRequestArray *filter_name_provider(AssistanceRequestArray *list)
 {
     char customer_name[MAX_CUSTOMER_NAME];
     read_string("Nome cliente: ", customer_name, MAX_CUSTOMER_NAME);
@@ -1131,4 +1136,27 @@ static void device_stats_cli(AssistanceRequestArray *list)
 static void priority_stats_cli(AssistanceRequestArray *list)
 {
     print_stats_by_priority(list);
+}
+
+/**
+ * @brief Sostituisce tutte le occorrenze di un determinato carattere con un altro all'interno di una stringa.
+ * * La funzione modifica direttamente la stringa originale passata come parametro (in-place).
+ * Se il carattere da cercare non è presente, la stringa rimane invariata.
+ *
+ * @param str La stringa di input da modificare (deve essere un array di caratteri scrivibile).
+ * @param old_char Il carattere da cercare che deve essere sostituito.
+ * @param new_char Il nuovo carattere da inserire al posto di quello vecchio.
+ */
+static void replace_char(char *str, char old_char, char new_char)
+{
+    if (str == NULL) {
+        return;
+    }
+
+    /* Scansione sequenziale della stringa fino al carattere terminatore '\0' */
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (str[i] == old_char) {
+            str[i] = new_char;
+        }
+    }
 }

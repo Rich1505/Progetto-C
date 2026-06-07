@@ -298,12 +298,25 @@ AssistanceRequestArray *copy_assistance_request_array(const AssistanceRequestArr
     for(int i = 0;i < size;i++)
     {
         new_arr[i] = copy_assistance_request(original_arr[i]);
+        if (new_arr[i] == NULL)
+        {
+            fprintf(stderr, "Errore copy_assistance_request_array: copia elemento %d fallita\n", i);
+            // Libera solo gli elementi già copiati con successo (0..i-1)
+            for (int j = 0; j < i; j++)
+            {
+                free_assistance_request(new_arr[j]);
+            }
+            free(new_arr);
+            return NULL;
+        }
     }
 
     AssistanceRequestArray *dest = malloc(sizeof(AssistanceRequestArray));
     if(dest == NULL)
     {
         fprintf(stderr, "Errore copy_assistance_request_array: Allocazione memoria non riuscita\n");
+        for (int i = 0; i < size; i++) free_assistance_request(new_arr[i]);
+        free(new_arr);
         return NULL;
     }
 

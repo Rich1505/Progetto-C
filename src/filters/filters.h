@@ -18,7 +18,7 @@
  * @return Un nuovo oggetto AssistanceRequestArray contenente solo le richieste corrispondenti, 
  * o NULL in caso di errore o parametri non validi.
  */
-const AssistanceRequestArray *filter_by_status(const AssistanceRequestArray * const arr, RequestStatus status);
+AssistanceRequestArray *filter_by_status(const AssistanceRequestArray * const arr, RequestStatus status);
 
 /**
  * @brief Filtra le richieste di assistenza in base al loro livello di priorità.
@@ -27,7 +27,7 @@ const AssistanceRequestArray *filter_by_status(const AssistanceRequestArray * co
  * @return Un nuovo oggetto AssistanceRequestArray contenente solo le richieste corrispondenti, 
  * o NULL in caso di errore o parametri non validi.
  */
-const AssistanceRequestArray *filter_by_priority(const AssistanceRequestArray * const arr, PriorityLevel priority);
+AssistanceRequestArray *filter_by_priority(const AssistanceRequestArray * const arr, PriorityLevel priority);
 
 /**
  * @brief Filtra le richieste di assistenza in base al nome esatto del cliente.
@@ -36,6 +36,6 @@ const AssistanceRequestArray *filter_by_priority(const AssistanceRequestArray * 
  * @return Un nuovo oggetto AssistanceRequestArray contenente solo le richieste corrispondenti, 
  * o NULL in caso di errore o parametri non validi.
  */
-const AssistanceRequestArray *filter_by_customer_name(const AssistanceRequestArray * const arr, char *customer_name);
+AssistanceRequestArray *filter_by_customer_name(const AssistanceRequestArray * const arr, char *customer_name);
 
 #endif //FILTERS_H
