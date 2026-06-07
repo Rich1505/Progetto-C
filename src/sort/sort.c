@@ -1,3 +1,10 @@
+#ifdef _WIN32
+    #define strcasecmp _stricmp
+    #define strncasecmp _strnicmp
+#else
+    #include <strings.h>
+#endif
+
 #include"sort.h"
 #include <string.h>
 #include<stdio.h>
@@ -71,7 +78,7 @@ int compare_by_estimated_cost(AssistanceRequest *a, AssistanceRequest *b)
 
 int compare_by_customer_name(AssistanceRequest *a, AssistanceRequest *b)
 {
-    return strcmp(get_customer_name(a), get_customer_name(b));
+    return strcasecmp(get_customer_name(a), get_customer_name(b));
 }
 
 static int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp)
