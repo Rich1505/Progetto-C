@@ -6,24 +6,36 @@
 
 static const int max_days_per_month[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
+/**
+ * @struct assistance_request
+ * @brief Rappresenta una singola richiesta di assistenza tecnica (Ticket).
+ * * Contiene tutte le informazioni anagrafiche, tecniche, operative ed economiche
+ * relative a un intervento di riparazione su un dispositivo.
+ */
 struct assistance_request
 {
-    int request_code;
-    char customer_name[MAX_CUSTOMER_NAME];
-    DeviceType device_type;
-    char description[MAX_DESCRIPTION];
-    PriorityLevel priority_level;
-    RequestStatus request_status;
-    float estimated_cost;
-    float final_cost;
-    Date opening_date;
+    int request_code;                       /**< Codice identificativo univoco e positivo della richiesta */
+    char customer_name[MAX_CUSTOMER_NAME];  /**< Stringa contenente il nome e cognome del cliente */
+    DeviceType device_type;                 /**< Tipologia di dispositivo da riparare (es. SMARTPHONE, LAPTOP) */
+    char description[MAX_DESCRIPTION];      /**< Testo descrittivo del guasto o del problema riscontrato */
+    PriorityLevel priority_level;           /**< Livello di urgenza assegnato all'intervento (es. LOW, HIGH) */
+    RequestStatus request_status;           /**< Stato di avanzamento corrente del ticket (es. OPEN, CLOSED) */
+    float estimated_cost;                   /**< Preventivo di spesa iniziale calcolato in fase di accettazione */
+    float final_cost;                       /**< Costo effettivo consuntivato al termine della lavorazione */
+    Date opening_date;                      /**< Data di inserimento della richiesta nel sistema */
 };
 
+/**
+ * @struct assistance_request_array
+ * @brief Contenitore dinamico (Array di puntatori) per la gestione delle richieste.
+ * * Implementa una struttura dati ad allocazione dinamica che permette di raggruppare 
+ * ed elaborare le richieste di assistenza, ottimizzando l'occupazione in memoria.
+ */
 struct assistance_request_array
 {
-    AssistanceRequest **array;
-    int size;
-    int capacity;
+    AssistanceRequest **array; /**< Array di puntatori a strutture AssistanceRequest allocati nell'Heap */
+    int size;                  /**< Numero di elementi (richieste) attualmente presenti nel contenitore */
+    int capacity;              /**< Spazio massimo di memoria allocato prima di una necessaria riallocazione */
 };
 
 /**

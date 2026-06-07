@@ -14,14 +14,40 @@
 #define MAX_DESCRIPTION 200
 #define WARE_INVALID_REQUEST_CODE -1
 
+/**
+ * @typedef AssistanceRequest
+ * @brief Tipo opaco che rappresenta una singola richiesta di assistenza tecnica.
+ *
+ * Questo tipo incapsula l'intera anagrafica e lo stato operativo di un ticket.
+ * Essendo un tipo opaco, i suoi campi interni non sono accessibili direttamente;
+ * per interagire con l'oggetto è necessario utilizzare le funzioni di interfaccia
+ * (getter e setter) fornite dal modulo.
+ */
 typedef struct assistance_request AssistanceRequest;
+
+/**
+ * @typedef AssistanceRequestArray
+ * @brief Tipo opaco che rappresenta il contenitore dinamico delle richieste di assistenza.
+ *
+ * Questa struttura funge da "database" in memoria, raggruppando tutti i ticket attivi.
+ * Trattandosi di un tipo opaco, la gestione della memoria, il ridimensionamento
+ * e l'accesso ai dati interni sono completamente incapsulati e gestiti mediante
+ * le funzioni dedicate del modulo (es. inserimento, rimozione, ordinamento).
+ */
 typedef struct assistance_request_array AssistanceRequestArray;
 
+/**
+ * @typedef Date
+ * @struct date
+ * @brief Rappresenta una data nel formato standard giorno/mese/anno.
+ * * Utilizzata per tracciare la cronologia degli eventi del sistema, come
+ * il momento dell'apertura o della presa in carico di un ticket.
+ */
 typedef struct date
 {
-    int day;
-    int month;
-    int year;
+    int day;   /**< Giorno del mese (valore compreso tra 1 e 31) */
+    int month; /**< Mese dell'anno (valore compreso tra 1 e 12) */
+    int year;  /**< Anno a quattro cifre (es. 2026) */
 } Date;
 
 typedef enum
