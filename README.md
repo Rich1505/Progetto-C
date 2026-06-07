@@ -9,7 +9,7 @@ Il sistema permette di creare, visualizzare, cercare e ordinare richieste di ass
 *   **Gestione Richieste**: Creazione di nuove richieste con codice univoco, nome cliente, tipo dispositivo, descrizione e priorità.
 *   **Aggiornamento**: Possibilità di modificare lo stato della riparazione, il costo stimato, il costo finale e la descrizione.
 *   **Ricerca e Ordinamento**: Ricerca rapida per codice richiesta e ordinamento della lista per nome cliente o per costo stimato.
-*   **Persistenza**: Salvataggio automatico e caricamento dei dati dal file `requests.txt`.
+*   **Persistenza**: Salvataggio e caricamento dei dati dal file `requests.txt`.
 *   **Interfaccia CLI**: Menu testuale intuitivo per l'interazione con l'utente.
 
 ## Struttura del Progetto
