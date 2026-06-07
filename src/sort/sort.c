@@ -29,7 +29,7 @@ static int merge(AssistanceRequest **arr, int l, int m, int r, Comparator comp);
  * @param comp Puntatore alla funzione di comparazione.
  * @return 0 in caso di successo, -1 se si verifica un errore a cascata nelle chiamate interne.
  */
-int merge_sort(AssistanceRequest **arr, int l, int r, Comparator comp);
+static int merge_sort(AssistanceRequest **arr, int l, int r, Comparator comp);
 
 void sort_by_estimated_cost(AssistanceRequestArray *arr)
 {
