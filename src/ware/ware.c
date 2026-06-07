@@ -256,6 +256,26 @@ AssistanceRequestArray *create_assistance_request_array(AssistanceRequest **arra
     return assistance_request_array;
 }
 
+AssistanceRequestArray *create_empty_request_array()
+{
+    AssistanceRequest **arr = malloc(sizeof (AssistanceRequest *) * 2);
+    if(arr == NULL)
+    {
+        return NULL;
+    }
+    arr[0] = NULL;
+    arr[1] = NULL;
+
+    AssistanceRequestArray *assistance_request_array = create_assistance_request_array(arr, 0, 2);
+    if(assistance_request_array == NULL)
+    {
+        free(arr);
+        return NULL;
+    }
+
+    return assistance_request_array;
+}
+
 AssistanceRequestArray *copy_assistance_request_array(const AssistanceRequestArray *src)
 {
     if(src == NULL)

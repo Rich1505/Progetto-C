@@ -4,7 +4,6 @@
 #include<stdlib.h>
 
 static void print_request_list(const AssistanceRequestArray *list);
-static AssistanceRequestArray *empty_request_array();
 
 void general_requests_report(const AssistanceRequestArray *list)
 {
@@ -121,26 +120,6 @@ void general_requests_report(const AssistanceRequestArray *list)
     free_assistance_request_array(sorted_array);
 }
 
-static AssistanceRequestArray *empty_request_array()
-{
-    AssistanceRequest **arr = malloc(sizeof (AssistanceRequest *) * 2);
-    if(arr == NULL)
-    {
-        return NULL;
-    }
-    arr[0] = NULL;
-    arr[1] = NULL;
-
-    AssistanceRequestArray *assistance_request_array = create_assistance_request_array(arr, 0, 2);
-    if(assistance_request_array == NULL)
-    {
-        free(arr);
-        return NULL;
-    }
-
-    return assistance_request_array;
-}
-
 static void print_request_list(const AssistanceRequestArray *list)
 {
     if(list == NULL)
@@ -180,20 +159,20 @@ void operative_requests_report(const AssistanceRequestArray *list)
     AssistanceRequestArray *closed_requests = NULL;
     AssistanceRequestArray *cancelled_requests = NULL;
 
-    high_priority_open_requests = empty_request_array();
+    high_priority_open_requests = create_empty_request_array();
     if(high_priority_open_requests == NULL)
     {
         return;
     }
 
-    in_progress_requests = empty_request_array();
+    in_progress_requests = create_empty_request_array();
     if(in_progress_requests == NULL)
     {
         free_assistance_request_array(high_priority_open_requests);
         return;
     }
 
-    closed_requests = empty_request_array();
+    closed_requests = create_empty_request_array();
     if(closed_requests == NULL)
     {
         free_assistance_request_array(high_priority_open_requests);
@@ -201,7 +180,7 @@ void operative_requests_report(const AssistanceRequestArray *list)
         return;
     }
 
-    cancelled_requests = empty_request_array();
+    cancelled_requests = create_empty_request_array();
     if(cancelled_requests == NULL)
     {
         free_assistance_request_array(high_priority_open_requests);

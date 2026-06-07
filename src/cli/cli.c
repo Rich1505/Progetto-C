@@ -30,6 +30,7 @@ static AssistanceRequest *read_existing_request(AssistanceRequestArray *list);
  *  FORWARD DECLARATIONS — menu principali e sottomenù
  * ========================================================= */
 static void print_main_menu(void);
+static int  run_startup_menu(void);
 static void run_request_management_menu(AssistanceRequestArray *list);
 static void run_search_filter_menu(AssistanceRequestArray *list);
 static void run_sort_menu(AssistanceRequestArray *list);
@@ -97,13 +98,24 @@ void run_main_menu(AssistanceRequestArray *list)
 {
     int choice;
 
+    print_splash_screen();
+
+    /* Se il caricamento dal file è fallito (list == NULL), mostriamo il menu
+     * di recupero: l'utente può scegliere di partire con una lista vuota o
+     * uscire. Il chiamante deve passare una lista vuota valida al posto di
+     * NULL affinché la scelta 1 funzioni correttamente. */
     if (list == NULL)
     {
-        show_error_message("Lista richieste non valida.");
-        return;
-    }
+        int startup_choice = run_startup_menu();
 
-    print_splash_screen();
+        if (startup_choice == 0)
+        {
+            printf("\nArrivederci!\n");
+            return;
+        }
+
+        list = create_empty_request_array();
+    }
 
     do
     {
@@ -141,6 +153,45 @@ static void print_splash_screen(void)
     printf("|              Tecnico  v1.0                   |\n");
     printf("+----------------------------------------------+\n");
     printf("\nBenvenuto! Seleziona un'area dal menu principale.\n\n");
+}
+
+
+/* =========================================================
+ *  MENU DI RECUPERO — lista non valida
+ * ========================================================= */
+
+/**
+ * @brief Mostra il menu di recupero quando il caricamento dal file è fallito.
+ *
+ * Presentato solo se @p list è NULL. Offre due opzioni:
+ *   1 — Avvia il programma con una lista vuota
+ *   0 — Esci
+ *
+ * @return 1 se l'utente vuole procedere con lista vuota, 0 per uscire.
+ */
+static int run_startup_menu(void)
+{
+    int choice;
+
+    printf("\n[ATTENZIONE] Caricamento dati dal file non riuscito.\n");
+
+    do
+    {
+        printf("\n+----------------------------------+\n");
+        printf("|        ERRORE DI AVVIO           |\n");
+        printf("+----------------------------------+\n");
+        printf("|  1. Inizia con lista vuota       |\n");
+        printf("|  0. Esci                         |\n");
+        printf("+----------------------------------+\n");
+
+        choice = read_int("Seleziona un'opzione: ");
+
+        if (choice != 0 && choice != 1)
+            show_error_message("Opzione non valida. Scegli 0 o 1.");
+
+    } while (choice != 0 && choice != 1);
+
+    return choice;
 }
 
 

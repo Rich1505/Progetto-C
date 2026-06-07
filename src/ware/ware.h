@@ -112,6 +112,12 @@ AssistanceRequest *create_assistance_request(int request_code, const char *custo
 AssistanceRequestArray *create_assistance_request_array(AssistanceRequest **array, int size, int capacity);
 
 /**
+ * @brief Alloca un contenitore dinamico (array) per le richieste di assistenza vuoto.
+ * @return Puntatore alla struttura array allocata, o NULL in caso di errore durante l'allocazione.
+ */
+AssistanceRequestArray *create_empty_request_array();
+
+/**
  * @brief Inserisce una richiesta nell'array dinamico, gestendo il ridimensionamento automatico.
  * @param assistance_request_array Puntatore all'array contenitore.
  * @param assistance_request Puntatore alla richiesta da inserire.
