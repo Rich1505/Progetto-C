@@ -665,7 +665,7 @@ static RequestStatus read_status(void)
             case 1: return STATUS_OPEN;
             case 2: return STATUS_IN_PROGRESS;
             case 3: return STATUS_CLOSED;
-            case 4: return STATUS_CANCELED;
+            case 4: return STATUS_CANCELLED;
             default:
                 show_error_message("Stato non valido. Reinserisci la scelta.");
         }
@@ -877,7 +877,7 @@ static void cancel_request_cli(AssistanceRequestArray *list)
         return;
     }
 
-    if (set_request_status_canceled(request) == 0)
+    if (set_request_status_cancelled(request) == 0)
     {
         show_success_message("Richiesta annullata correttamente.");
     }
@@ -928,7 +928,7 @@ static void update_status_cli_on(AssistanceRequest *request)
         case STATUS_OPEN:        result = set_request_status_opened(request);      break;
         case STATUS_IN_PROGRESS: result = set_request_status_in_progress(request); break;
         case STATUS_CLOSED:      result = set_request_status_closed(request);      break;
-        case STATUS_CANCELED:    result = set_request_status_canceled(request);    break;
+        case STATUS_CANCELLED:    result = set_request_status_cancelled(request);    break;
         default:                 result = -1;
     }
 

@@ -43,7 +43,7 @@ void general_requests_report(const AssistanceRequestArray *list)
                 closed_status_requests_number++;
                 final_cost_sum += get_final_cost(arr[i]);
                 break;
-            case STATUS_CANCELED:
+            case STATUS_CANCELLED:
                 cancelled_status_requests_number++;
                 break;
         }
@@ -210,7 +210,7 @@ void operative_requests_report(const AssistanceRequestArray *list)
             case STATUS_CLOSED:
                 insert_assistance_request(closed_requests, arr[i]);
                 break;
-            case STATUS_CANCELED:
+            case STATUS_CANCELLED:
                 insert_assistance_request(cancelled_requests, arr[i]);
                 break;
         }

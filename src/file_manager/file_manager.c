@@ -179,7 +179,7 @@ AssistanceRequestArray *read_from_memory()
         else if (st == 2)
             request_status = STATUS_CLOSED;
         else if (st == 3)
-            request_status = STATUS_CANCELED;
+            request_status = STATUS_CANCELLED;
         else
         {
             fprintf(stderr, "Inserire uno stato valido\n");

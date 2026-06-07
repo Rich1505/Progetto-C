@@ -74,7 +74,7 @@ typedef enum
     STATUS_OPEN = 0,
     STATUS_IN_PROGRESS,
     STATUS_CLOSED,
-    STATUS_CANCELED
+    STATUS_CANCELLED
 } RequestStatus;
 
 /**
@@ -199,7 +199,7 @@ int set_request_status_in_progress(AssistanceRequest *request);
 
 int set_request_status_closed(AssistanceRequest *request);
 
-int set_request_status_canceled(AssistanceRequest *request);
+int set_request_status_cancelled(AssistanceRequest *request);
 
 int set_estimated_cost(AssistanceRequest *request, float estimated_cost);
 

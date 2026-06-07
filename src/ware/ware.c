@@ -553,7 +553,7 @@ int set_request_status_closed(AssistanceRequest *request)
     return 0;
 }
 
-int set_request_status_canceled(AssistanceRequest *request)
+int set_request_status_cancelled(AssistanceRequest *request)
 {
     if(request == NULL)
     {
@@ -561,7 +561,7 @@ int set_request_status_canceled(AssistanceRequest *request)
         return -1;
     }
 
-    request->request_status = STATUS_CANCELED;
+    request->request_status = STATUS_CANCELLED;
     return 0;
 }
 
@@ -633,7 +633,7 @@ static const char *status_to_string(RequestStatus status)
         case STATUS_OPEN:        return "OPEN";
         case STATUS_IN_PROGRESS: return "IN_PROGRESS";
         case STATUS_CLOSED:      return "CLOSED";
-        case STATUS_CANCELED:    return "CANCELED";
+        case STATUS_CANCELLED:    return "CANCELED";
         default:                 return "ERRORE";
     }
 }
